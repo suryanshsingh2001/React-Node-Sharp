@@ -2,6 +2,9 @@ import { useEffect } from "react";
 import { useImageContext } from "../context/ImageContext";
 
 export default function ImageControls() {
+
+
+  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
   const {
     brightness,
     setBrightness,
@@ -14,28 +17,86 @@ export default function ImageControls() {
     setPreview,
   } = useImageContext();
 
-  // useEffect(() => {
-  //   const updatePreview = async () => {
-  //     try {
-  //       const response = await fetch("/api/process", {
-  //         method: "POST",
-  //         headers: {
-  //           "Content-Type": "application/json",
-  //         },
-  //         body: JSON.stringify({ brightness, contrast, saturation, rotation }),
-  //       });
-  //       const data = await response.json();
+  // Separate useEffect hooks for each manipulation task
+  useEffect(() => {
+    const updateBrightness = async () => {
+      try {
+        const response = await fetch(`${apiBaseUrl}/brightness`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ brightness }),
+        });
+        const data = await response.json();
+        setPreview(data.previewUrl);
+      } catch (error) {
+        console.error("Error processing brightness:", error);
+      }
+    };
 
+    if (brightness !== 100) updateBrightness();
+  }, [brightness]);
 
-        
-  //       setPreview(data.previewUrl);
-  //     } catch (error) {
-  //       console.error("Error processing image:", error);
-  //     }
-  //   };
+  useEffect(() => {
+    const updateContrast = async () => {
+      try {
+        const response = await fetch("/api/contrast", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ contrast }),
+        });
+        const data = await response.json();
+        setPreview(data.previewUrl);
+      } catch (error) {
+        console.error("Error processing contrast:", error);
+      }
+    };
 
-  //   updatePreview();
-  // }, [brightness, contrast, saturation, rotation]);
+    if (contrast !== 100) updateContrast();
+  }, [contrast]);
+
+  useEffect(() => {
+    const updateSaturation = async () => {
+      try {
+        const response = await fetch("/api/saturation", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ saturation }),
+        });
+        const data = await response.json();
+        setPreview(data.previewUrl);
+      } catch (error) {
+        console.error("Error processing saturation:", error);
+      }
+    };
+
+    if (saturation !== 100) updateSaturation();
+  }, [saturation]);
+
+  useEffect(() => {
+    const updateRotation = async () => {
+      try {
+        const response = await fetch("/api/rotate", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ rotation }),
+        });
+        const data = await response.json();
+        setPreview(data.previewUrl);
+      } catch (error) {
+        console.error("Error rotating image:", error);
+      }
+    };
+
+    if (rotation !== 0) updateRotation();
+  }, [rotation]);
 
   return (
     <div className="space-y-4">

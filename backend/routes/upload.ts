@@ -24,7 +24,7 @@ router.post("/", upload.single("image"), async (req, res) => {
     return res.status(400).json({ message: "No image uploaded!" });
   }
 
-  const imagePath = path.join(__dirname, "../uploads", `${Date.now()}.jpeg`);
+  const imagePath = path.join(__dirname, "../uploads", `image.jpeg`);
 
   try {
     await saveImage(req.file.buffer, imagePath);

@@ -1,26 +1,31 @@
 import express from 'express';
-import cors from 'cors'; // Import CORS middleware
+import cors from 'cors';
+import uploadRoutes from './routes/upload';
+import brightnessRoutes from './routes/brightness';
+import contrastRoutes from './routes/contrast';
+import rotationRoutes from './routes/rotation';
+import cropRoutes from './routes/crop';
+import convertRoutes from './routes/convert';
 import path from 'path';
-import uploadRoute from './routes/upload';
-import processRoute from './routes/process';
 
 const app = express();
 
-// Enable CORS for all routes
+// Middleware
+app.use(express.json());
 app.use(cors());
 
-// Middleware to handle JSON body
-app.use(express.json());
-
-// Serve static files (uploaded images)
+// Serve static files
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// Routes
-app.use('/api/upload', uploadRoute);
-app.use('/api/process', processRoute);
+// Use the image manipulation routes
+app.use('/api/upload', uploadRoutes);
+app.use('/api/brightness', brightnessRoutes);
+app.use('/api/contrast', contrastRoutes);
+app.use('/api/rotate', rotationRoutes);
+app.use('/api/crop', cropRoutes);
+app.use('/api/convert', convertRoutes);
 
-// Server setup
-const PORT = process.env.PORT || 5000;
+const PORT = 5000;
 app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+  console.log(`Server running on http://localhost:${PORT}`);
 });

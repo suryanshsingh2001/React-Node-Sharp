@@ -1,0 +1,31 @@
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = __importDefault(require("express"));
+const cors_1 = __importDefault(require("cors"));
+const upload_1 = __importDefault(require("./routes/upload"));
+const brightness_1 = __importDefault(require("./routes/brightness"));
+const contrast_1 = __importDefault(require("./routes/contrast"));
+const rotation_1 = __importDefault(require("./routes/rotation"));
+const crop_1 = __importDefault(require("./routes/crop"));
+const convert_1 = __importDefault(require("./routes/convert"));
+const path_1 = __importDefault(require("path"));
+const app = (0, express_1.default)();
+// Middleware
+app.use(express_1.default.json());
+app.use((0, cors_1.default)());
+// Serve static files
+app.use('/uploads', express_1.default.static(path_1.default.join(__dirname, 'uploads')));
+// Use the image manipulation routes
+app.use('/api/upload', upload_1.default);
+app.use('/api/brightness', brightness_1.default);
+app.use('/api/contrast', contrast_1.default);
+app.use('/api/rotate', rotation_1.default);
+app.use('/api/crop', crop_1.default);
+app.use('/api/convert', convert_1.default);
+const PORT = 5000;
+app.listen(PORT, () => {
+    console.log(`Server running on http://localhost:${PORT}`);
+});
