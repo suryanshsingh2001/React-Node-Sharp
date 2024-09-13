@@ -5,6 +5,7 @@ export default function ImageControls() {
 
 
   const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
+  const storageUrl = import.meta.env.VITE_STORAGE_URL;
   const {
     brightness,
     setBrightness,
@@ -29,7 +30,8 @@ export default function ImageControls() {
           body: JSON.stringify({ brightness }),
         });
         const data = await response.json();
-        setPreview(data.previewUrl);
+      
+        setPreview(`${storageUrl}/${data.previewUrl}`);
       } catch (error) {
         console.error("Error processing brightness:", error);
       }

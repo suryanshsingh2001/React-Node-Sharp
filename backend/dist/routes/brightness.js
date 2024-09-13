@@ -17,17 +17,18 @@ const sharp_1 = __importDefault(require("sharp"));
 const path_1 = __importDefault(require("path"));
 const fs_1 = __importDefault(require("fs"));
 const router = express_1.default.Router();
+const imagePath = path_1.default.resolve(process.cwd(), "uploads", `image.jpeg`);
 // POST /api/brightness - Adjust image brightness
 router.post('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { brightness } = req.body;
     try {
-        const imageBuffer = fs_1.default.readFileSync(path_1.default.join(__dirname, '../uploads', 'image.jpeg'));
+        const imageBuffer = fs_1.default.readFileSync(imagePath);
         const image = (0, sharp_1.default)(imageBuffer)
             .modulate({ brightness: brightness / 100 });
         const previewBuffer = yield image.resize(800).jpeg({ quality: 60 }).toBuffer();
-        const previewPath = path_1.default.join(__dirname, '../uploads', `${Date.now()}.jpeg`);
-        fs_1.default.writeFileSync(previewPath, previewBuffer);
-        res.json({ previewUrl: `${path_1.default.basename(previewPath)}` });
+        fs_1.default.writeFileSync(imagePath, previewBuffer);
+        console.log(imagePath);
+        res.json({ previewUrl: `${path_1.default.basename(imagePath)}` });
     }
     catch (error) {
         res.status(500).json({ message: 'Error processing image' });

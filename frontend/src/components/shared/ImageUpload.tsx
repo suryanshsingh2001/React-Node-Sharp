@@ -46,7 +46,6 @@ export default function ImageUpload() {
         const clientImage = `${storageUrl}/${data.previewUrl}`;
         console.log(clientImage);
         setPreview(clientImage);
-        e.target.value = ""; // Reset file input after successful upload
       } catch (error) {
         console.error("Error uploading image:", error);
         setError("Failed to upload image. Please try again.");
@@ -63,6 +62,7 @@ export default function ImageUpload() {
         type="file"
         accept="image/png,image/jpeg"
         onChange={handleFileChange}
+
         disabled={loading}
         className={`block w-full text-sm text-gray-500
           file:mr-4 file:py-2 file:px-4
