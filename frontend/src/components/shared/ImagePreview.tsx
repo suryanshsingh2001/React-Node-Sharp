@@ -2,6 +2,7 @@ import { useImageContext } from '../context/ImageContext'
 
 export default function ImagePreview() {
   const { preview } = useImageContext()
+  console.log(preview)
 
   return (
     <div className="border rounded-lg overflow-hidden">

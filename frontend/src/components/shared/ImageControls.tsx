@@ -14,25 +14,28 @@ export default function ImageControls() {
     setPreview,
   } = useImageContext();
 
-  useEffect(() => {
-    const updatePreview = async () => {
-      try {
-        const response = await fetch("/api/process", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ brightness, contrast, saturation, rotation }),
-        });
-        const data = await response.json();
-        setPreview(data.previewUrl);
-      } catch (error) {
-        console.error("Error processing image:", error);
-      }
-    };
+  // useEffect(() => {
+  //   const updatePreview = async () => {
+  //     try {
+  //       const response = await fetch("/api/process", {
+  //         method: "POST",
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //         },
+  //         body: JSON.stringify({ brightness, contrast, saturation, rotation }),
+  //       });
+  //       const data = await response.json();
 
-    updatePreview();
-  }, [brightness, contrast, saturation, rotation]);
+
+        
+  //       setPreview(data.previewUrl);
+  //     } catch (error) {
+  //       console.error("Error processing image:", error);
+  //     }
+  //   };
+
+  //   updatePreview();
+  // }, [brightness, contrast, saturation, rotation]);
 
   return (
     <div className="space-y-4">

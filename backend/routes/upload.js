@@ -28,18 +28,19 @@ const saveImage = (buffer, filePath) => __awaiter(void 0, void 0, void 0, functi
         .toFile(filePath);
 });
 // POST /api/upload - Handle image uploads
-router.post('/', upload.single('image'), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+router.post("/", upload.single("image"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     if (!req.file) {
-        return res.status(400).json({ message: 'No image uploaded!' });
+        return res.status(400).json({ message: "No image uploaded!" });
     }
-    const imagePath = path_1.default.join(__dirname, '../uploads', `${Date.now()}.jpeg`);
+    const imagePath = path_1.default.join(__dirname, "../uploads", `${Date.now()}.jpeg`);
     try {
         yield saveImage(req.file.buffer, imagePath);
-        const previewUrl = `/uploads/${path_1.default.basename(imagePath)}`;
-        res.json({ previewUrl });
+        const previewUrl = `${path_1.default.basename(imagePath)}`;
+        // Send success response
+        res.status(200).json({ previewUrl, message: "Image uploaded successfully" });
     }
     catch (error) {
-        res.status(500).json({ message: 'Error processing image' });
+        res.status(500).json({ message: "Error processing image" });
     }
 }));
 exports.default = router;

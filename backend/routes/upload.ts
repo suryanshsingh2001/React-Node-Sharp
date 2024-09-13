@@ -1,8 +1,8 @@
-import express from 'express';
-import multer from 'multer';
-import sharp from 'sharp';
-import path from 'path';
-import fs from 'fs';
+import express from "express";
+import multer from "multer";
+import sharp from "sharp";
+import path from "path";
+import fs from "fs";
 
 const router = express.Router();
 
@@ -19,19 +19,21 @@ const saveImage = async (buffer: Buffer, filePath: string) => {
 };
 
 // POST /api/upload - Handle image uploads
-router.post('/', upload.single('image'), async (req, res) => {
+router.post("/", upload.single("image"), async (req, res) => {
   if (!req.file) {
-    return res.status(400).json({ message: 'No image uploaded!' });
+    return res.status(400).json({ message: "No image uploaded!" });
   }
 
-  const imagePath = path.join(__dirname, '../uploads', `${Date.now()}.jpeg`);
+  const imagePath = path.join(__dirname, "../uploads", `${Date.now()}.jpeg`);
 
   try {
     await saveImage(req.file.buffer, imagePath);
-    const previewUrl = `/uploads/${path.basename(imagePath)}`;
-    res.json({ previewUrl });
+    const previewUrl = `${path.basename(imagePath)}`;
+    
+    // Send success response
+    res.status(200).json({ previewUrl, message: "Image uploaded successfully" });
   } catch (error) {
-    res.status(500).json({ message: 'Error processing image' });
+    res.status(500).json({ message: "Error processing image" });
   }
 });
 
