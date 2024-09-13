@@ -15,7 +15,9 @@ app.use(express.json());
 app.use(cors());
 
 // Serve static files
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+
+app.use('/uploads', express.static(path.join(__dirname, "../", "uploads")));
 
 // Use the image manipulation routes
 app.use('/api/upload', uploadRoutes);
@@ -29,3 +31,4 @@ const PORT = 5000;
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
+

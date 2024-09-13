@@ -20,6 +20,8 @@ const router = express_1.default.Router();
 // Configure multer to handle image uploads
 const storage = multer_1.default.memoryStorage();
 const upload = (0, multer_1.default)({ storage });
+// Resolve the image path relative to the project root
+const imagePath = path_1.default.resolve(process.cwd(), "uploads", `image.jpeg`);
 // Helper function to save images
 const saveImage = (buffer, filePath) => __awaiter(void 0, void 0, void 0, function* () {
     return (0, sharp_1.default)(buffer)
@@ -29,15 +31,19 @@ const saveImage = (buffer, filePath) => __awaiter(void 0, void 0, void 0, functi
 });
 // POST /api/upload - Handle image uploads
 router.post("/", upload.single("image"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    console.log(req.file);
+    console.log(imagePath); // This will now log the correct path to the 'uploads' folder
     if (!req.file) {
         return res.status(400).json({ message: "No image uploaded!" });
     }
-    const imagePath = path_1.default.join(__dirname, "../uploads", `${Date.now()}.jpeg`);
     try {
         yield saveImage(req.file.buffer, imagePath);
-        const previewUrl = `${path_1.default.basename(imagePath)}`;
+        const previewUrl = `${path_1.default.basename(imagePath)}`; // Adjusted URL for frontend
+        console.log(previewUrl);
         // Send success response
-        res.status(200).json({ previewUrl, message: "Image uploaded successfully" });
+        res
+            .status(200)
+            .json({ previewUrl, message: "Image uploaded successfully" });
     }
     catch (error) {
         res.status(500).json({ message: "Error processing image" });

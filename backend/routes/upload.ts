@@ -10,6 +10,9 @@ const router = express.Router();
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
+// Resolve the image path relative to the project root
+const imagePath = path.resolve(process.cwd(), "uploads", `image.jpeg`);
+
 // Helper function to save images
 const saveImage = async (buffer: Buffer, filePath: string) => {
   return sharp(buffer)
@@ -20,18 +23,23 @@ const saveImage = async (buffer: Buffer, filePath: string) => {
 
 // POST /api/upload - Handle image uploads
 router.post("/", upload.single("image"), async (req, res) => {
+
+  console.log(req.file);
+  console.log(imagePath); // This will now log the correct path to the 'uploads' folder
+
   if (!req.file) {
     return res.status(400).json({ message: "No image uploaded!" });
   }
 
-  const imagePath = path.join(__dirname, "../uploads", `image.jpeg`);
-
   try {
     await saveImage(req.file.buffer, imagePath);
-    const previewUrl = `${path.basename(imagePath)}`;
-    
+    const previewUrl = `${path.basename(imagePath)}`; // Adjusted URL for frontend
+    console.log(previewUrl);
+
     // Send success response
-    res.status(200).json({ previewUrl, message: "Image uploaded successfully" });
+    res
+      .status(200)
+      .json({ previewUrl, message: "Image uploaded successfully" });
   } catch (error) {
     res.status(500).json({ message: "Error processing image" });
   }
