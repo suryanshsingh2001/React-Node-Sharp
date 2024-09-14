@@ -29,6 +29,7 @@ app.use("/api/saturation", saturationRoutes) //✅
 app.use('/api/rotate', rotationRoutes);
 app.use('/api/crop', cropRoutes);
 app.use('/api/download', downloadRoutes);
+app.use('/api/reset', downloadRoutes);
 
 const PORT = 5000;
 app.listen(PORT, () => {

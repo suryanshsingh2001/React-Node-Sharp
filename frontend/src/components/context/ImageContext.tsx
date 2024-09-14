@@ -13,6 +13,7 @@ interface ImageContextType {
   setSaturation: (value: number) => void
   rotation: number
   setRotation: (value: number) => void
+  clearAll: () => void
 }
 
 const ImageContext = createContext<ImageContextType | undefined>(undefined)
@@ -24,6 +25,17 @@ export const ImageProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [contrast, setContrast] = useState<number>(100)
   const [saturation, setSaturation] = useState<number>(100)
   const [rotation, setRotation] = useState<number>(0)
+
+  // Function to clear all the states
+  const clearAll = () => {
+    setImage(null)
+    setPreview('')
+    setBrightness(100)
+    setContrast(100)
+    setSaturation(100)
+    setRotation(0)
+  
+  }
 
   return (
     <ImageContext.Provider
@@ -40,6 +52,7 @@ export const ImageProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         setSaturation,
         rotation,
         setRotation,
+        clearAll, // Add the clearAll function to the context value
       }}
     >
       {children}

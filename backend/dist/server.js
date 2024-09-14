@@ -28,6 +28,7 @@ app.use("/api/saturation", saturation_1.default); //✅
 app.use('/api/rotate', rotation_1.default);
 app.use('/api/crop', crop_1.default);
 app.use('/api/download', download_1.default);
+app.use('/api/reset', download_1.default);
 const PORT = 5000;
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);

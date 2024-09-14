@@ -71,7 +71,6 @@ export default function ImageUpload() {
           </Alert>
         )}
         <div className="grid w-full max-w-sm items-center gap-1.5">
-          <Label htmlFor="image-upload">Image</Label>
           <Input
             id="image-upload"
             type="file"
