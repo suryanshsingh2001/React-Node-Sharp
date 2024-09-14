@@ -1,10 +1,19 @@
-'use client'
-
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { useImageContext } from "../context/ImageContext"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Slider } from "@/components/ui/slider"
 import { Label } from "@/components/ui/label"
+
+// Debounce function to limit the frequency of API calls
+const debounce = (func: (...args: any[]) => void, delay: number) => {
+  let timer: NodeJS.Timeout
+  return (...args: any[]) => {
+    clearTimeout(timer)
+    timer = setTimeout(() => {
+      func(...args)
+    }, delay)
+  }
+}
 
 export default function ImageControls() {
   const apiBaseUrl = import.meta.env.VITE_API_BASE_URL
@@ -21,7 +30,16 @@ export default function ImageControls() {
     setPreview,
   } = useImageContext()
 
-  const updateImage = async (endpoint: string, value: number, setter: (value: number) => void) => {
+  // State to store debounced values
+  const [debouncedValues, setDebouncedValues] = useState({
+    brightness,
+    contrast,
+    saturation,
+    rotation,
+  })
+
+  // Debounced API call for updating image based on slider input
+  const updateImage = debounce(async (endpoint: string, value: number) => {
     try {
       const response = await fetch(`${apiBaseUrl}/${endpoint}`, {
         method: "POST",
@@ -32,27 +50,43 @@ export default function ImageControls() {
       })
       const data = await response.json()
       setPreview(`${storageUrl}/${data.previewUrl}`)
-      setter(value)
     } catch (error) {
-      console.error(`Error processing ${endpoint}:`, error)
+      console.error(`Error updating ${endpoint}:`, error)
+    }
+  }, 300) // 300ms delay
+
+  // Unified useEffect to handle all updates
+  useEffect(() => {
+    const { brightness, contrast, saturation, rotation } = debouncedValues
+
+    if (brightness !== 100) updateImage("brightness", brightness)
+    if (contrast !== 100) updateImage("contrast", contrast)
+    if (saturation !== 100) updateImage("saturation", saturation)
+    if (rotation !== 0) updateImage("rotate", rotation)
+  }, [debouncedValues])
+
+  // Slider change handler that updates both local and debounced state
+  const handleSliderChange = (type: string, value: number) => {
+    setDebouncedValues((prev) => ({ ...prev, [type]: value }))
+
+    // Update individual states in the context
+    switch (type) {
+      case "brightness":
+        setBrightness(value)
+        break
+      case "contrast":
+        setContrast(value)
+        break
+      case "saturation":
+        setSaturation(value)
+        break
+      case "rotation":
+        setRotation(value)
+        break
+      default:
+        break
     }
   }
-
-  useEffect(() => {
-    if (brightness !== 100) updateImage("brightness", brightness, setBrightness)
-  }, [brightness])
-
-  useEffect(() => {
-    if (contrast !== 100) updateImage("contrast", contrast, setContrast)
-  }, [contrast])
-
-  useEffect(() => {
-    if (saturation !== 100) updateImage("saturation", saturation, setSaturation)
-  }, [saturation])
-
-  useEffect(() => {
-    if (rotation !== 0) updateImage("rotate", rotation, setRotation)
-  }, [rotation])
 
   return (
     <Card className="w-full">
@@ -68,7 +102,7 @@ export default function ImageControls() {
             max={200}
             step={1}
             value={[brightness]}
-            onValueChange={(value) => setBrightness(value[0])}
+            onValueChange={(value) => handleSliderChange("brightness", value[0])}
           />
         </div>
         <div className="space-y-2">
@@ -79,7 +113,7 @@ export default function ImageControls() {
             max={200}
             step={1}
             value={[contrast]}
-            onValueChange={(value) => setContrast(value[0])}
+            onValueChange={(value) => handleSliderChange("contrast", value[0])}
           />
         </div>
         <div className="space-y-2">
@@ -90,7 +124,7 @@ export default function ImageControls() {
             max={200}
             step={1}
             value={[saturation]}
-            onValueChange={(value) => setSaturation(value[0])}
+            onValueChange={(value) => handleSliderChange("saturation", value[0])}
           />
         </div>
         <div className="space-y-2">
@@ -101,7 +135,7 @@ export default function ImageControls() {
             max={360}
             step={1}
             value={[rotation]}
-            onValueChange={(value) => setRotation(value[0])}
+            onValueChange={(value) => handleSliderChange("rotation", value[0])}
           />
         </div>
       </CardContent>
