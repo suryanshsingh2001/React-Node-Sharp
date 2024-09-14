@@ -17,21 +17,47 @@ const sharp_1 = __importDefault(require("sharp"));
 const path_1 = __importDefault(require("path"));
 const fs_1 = __importDefault(require("fs"));
 const router = express_1.default.Router();
+const uploadsDir = path_1.default.resolve(process.cwd(), "uploads");
+const exportDir = path_1.default.resolve(process.cwd(), "exports");
+// Ensure the export directory exists
+if (!fs_1.default.existsSync(exportDir)) {
+    fs_1.default.mkdirSync(exportDir);
+}
+// POST /api/export - Apply changes and export the high-quality image
 router.post("/", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { format } = req.body; // e.g., 'jpeg', 'png'
-        const uploadsDir = path_1.default.resolve(process.cwd(), "uploads");
-        const exportDir = path_1.default.resolve(process.cwd(), "exports");
+        const { format, brightness, contrast, saturation, rotation } = req.body; // Image parameters
         const imageBuffer = fs_1.default.readFileSync(path_1.default.join(uploadsDir, "original.jpeg"));
-        const convertedImage = yield (0, sharp_1.default)(imageBuffer).toFormat(format).toBuffer();
-        const exportPath = path_1.default.join(exportDir, `original.${format}`);
+        // Apply all modifications
+        let modifiedImage = (0, sharp_1.default)(imageBuffer);
+        // Adjust brightness, contrast, and saturation if necessary
+        if (brightness || contrast || saturation) {
+            if (brightness || saturation) {
+                modifiedImage = modifiedImage.modulate({
+                    brightness: brightness ? brightness / 100 : 1, // Default is 100%
+                    saturation: saturation ? saturation / 100 : 1, // Default is 100%
+                });
+            }
+            if (contrast) {
+                modifiedImage = modifiedImage.linear(contrast / 100, 0); // Adjust contrast
+            }
+        }
+        // Apply rotation if needed
+        if (rotation) {
+            modifiedImage = modifiedImage.rotate(rotation);
+        }
+        // Convert to the requested format and export
+        const convertedImage = yield modifiedImage.toFormat(format).toBuffer();
+        // Save the high-quality image to the export directory
+        const exportPath = path_1.default.join(exportDir, `exported_image.${format}`);
         fs_1.default.writeFileSync(exportPath, convertedImage);
-        // Send the preview URL for the frontend to download
-        console.log("Image converted successfully", exportPath);
-        res.status(200).json({ previewUrl: path_1.default.basename(exportPath) });
+        // Send the preview URL for the frontend to download the image
+        console.log("Image exported successfully", exportPath);
+        res.status(200).json({ url: `${path_1.default.basename(exportPath)}` });
     }
     catch (error) {
-        res.status(500).json({ message: "Error converting image" });
+        console.error("Error exporting image:", error);
+        res.status(500).json({ message: "Error exporting image" });
     }
 }));
 exports.default = router;

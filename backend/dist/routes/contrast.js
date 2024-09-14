@@ -17,8 +17,8 @@ const sharp_1 = __importDefault(require("sharp"));
 const path_1 = __importDefault(require("path"));
 const fs_1 = __importDefault(require("fs"));
 const router = express_1.default.Router();
-const originalImagePath = path_1.default.resolve(process.cwd(), "uploads", `original.jpeg`);
-const previewImagePath = path_1.default.resolve(process.cwd(), "uploads", `preview.jpeg`);
+const originalImagePath = path_1.default.resolve(process.cwd(), "uploads", "original.jpeg");
+const previewImagePath = path_1.default.resolve(process.cwd(), "uploads", "preview.jpeg");
 // Helper function to save preview image
 const savePreviewImage = (imageBuffer, filePath) => __awaiter(void 0, void 0, void 0, function* () {
     return (0, sharp_1.default)(imageBuffer)
@@ -32,11 +32,14 @@ router.post("/", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         // Read original image
         const imageBuffer = fs_1.default.readFileSync(originalImagePath);
-        let image = (0, sharp_1.default)(imageBuffer).linear(contrast / 100, -(128 * (contrast / 100 - 1)));
+        // Adjust contrast using linear
+        let image = (0, sharp_1.default)(imageBuffer).linear(contrast / 100, // Multiplier for contrast (1 = no change, >1 = more contrast, <1 = less contrast)
+        -(128 * (contrast / 100 - 1)) // Brightness offset to maintain mid-tones
+        );
         // Save the updated original image
         yield image.toFile(originalImagePath);
         // Generate and save the preview image
-        yield savePreviewImage(imageBuffer, previewImagePath);
+        yield savePreviewImage(yield image.toBuffer(), previewImagePath);
         // Respond with preview URL and cache-busting
         res.json({
             previewUrl: `${path_1.default.basename(previewImagePath)}?t=${Date.now()}`,

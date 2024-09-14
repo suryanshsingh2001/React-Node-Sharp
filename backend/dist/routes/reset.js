@@ -50,7 +50,9 @@ router.get("/", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         if (fs_1.default.existsSync(uploadsFolder)) {
             yield clearAllFilesInFolder(uploadsFolder);
             yield clearAllFilesInFolder(exportsFolder);
-            res.status(200).json({ message: "All images have been removed from uploads folder." });
+            res
+                .status(200)
+                .json({ message: "All images have been removed from uploads folder." });
         }
         else {
             res.status(400).json({ message: "Uploads folder does not exist." });

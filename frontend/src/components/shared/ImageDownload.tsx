@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
 
 export default function ImageDownload() {
-  const { image, clearAll } = useImageContext();
+  const { image, clearAll, contrast, saturation, brightness, rotation } = useImageContext();
   const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
   const downloadUrl = import.meta.env.VITE_DOWNLOAD_URL;
 
@@ -28,18 +28,20 @@ export default function ImageDownload() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ format }),
+        body: JSON.stringify({ format, contrast, saturation, brightness, rotation }),
       });
 
       if (!response.ok) {
         throw new Error("Failed to get download URL");
       }
 
-      const { previewUrl } = await response.json();
-      console.log("previewUrl:", previewUrl);
+      const { url } = await response.json();
+      console.log("previewUrl:", url);
 
-      const url = `${downloadUrl}/${previewUrl}`;
-      FileSaver.saveAs(url, `processed.${format}`);
+      const exportUrl = `${downloadUrl}/${url}`;
+
+      console.log("Downloading image from:", exportUrl);
+      FileSaver.saveAs(exportUrl, `processed.${format}`);
 
       clearAll();
 

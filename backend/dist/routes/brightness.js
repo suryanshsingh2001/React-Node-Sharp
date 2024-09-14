@@ -40,12 +40,15 @@ router.post("/", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         // Load the original image
         const imageBuffer = fs_1.default.readFileSync(originalImagePath);
         let image = (0, sharp_1.default)(imageBuffer);
-        // Adjust brightness
-        image = image.modulate({ brightness: brightness / 100 });
-        // Save the updated original image
-        yield image.toFile(originalImagePath); // Overwrite the original
-        // Generate and save the preview image
-        yield savePreviewImage(imageBuffer, previewImagePath);
+        // Adjust brightness relative to 1.0 (100%) 
+        const adjustedBrightness = brightness / 100; // 1.0 means no change
+        // Adjust brightness only if it's different from 100
+        if (brightness !== 100) {
+            image = image.modulate({ brightness: adjustedBrightness });
+        }
+        // Generate and save the preview image from the original buffer, not the overwritten image
+        const previewBuffer = yield image.toBuffer();
+        yield savePreviewImage(previewBuffer, previewImagePath);
         // Return the preview URL with cache-busting
         res.json({ previewUrl: `${path_1.default.basename(previewImagePath)}?t=${Date.now()}` });
     }

@@ -53,7 +53,7 @@ export default function ImageControls() {
     } catch (error) {
       console.error(`Error updating ${endpoint}:`, error)
     }
-  }, 300) // 300ms delay
+  }, 400) 
 
   // Unified useEffect to handle all updates
   useEffect(() => {
@@ -62,7 +62,7 @@ export default function ImageControls() {
     if (brightness !== 100) updateImage("brightness", brightness)
     if (contrast !== 100) updateImage("contrast", contrast)
     if (saturation !== 100) updateImage("saturation", saturation)
-    if (rotation !== 0) updateImage("rotate", rotation)
+    if (rotation !== 0) updateImage("rotation", rotation)
   }, [debouncedValues])
 
   // Slider change handler that updates both local and debounced state
