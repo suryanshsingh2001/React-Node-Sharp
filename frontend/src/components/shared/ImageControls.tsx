@@ -3,8 +3,8 @@ import { useImageContext } from "../context/ImageContext"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Slider } from "@/components/ui/slider"
 import { Label } from "@/components/ui/label"
+import { Input } from "@/components/ui/input"
 
-// Debounce function to limit the frequency of API calls
 const debounce = (func: (...args: any[]) => void, delay: number) => {
   let timer: NodeJS.Timeout
   return (...args: any[]) => {
@@ -30,7 +30,6 @@ export default function ImageControls() {
     setPreview,
   } = useImageContext()
 
-  // State to store debounced values
   const [debouncedValues, setDebouncedValues] = useState({
     brightness,
     contrast,
@@ -38,7 +37,6 @@ export default function ImageControls() {
     rotation,
   })
 
-  // Debounced API call for updating image based on slider input
   const updateImage = debounce(async (endpoint: string, value: number) => {
     try {
       const response = await fetch(`${apiBaseUrl}/${endpoint}`, {
@@ -53,9 +51,8 @@ export default function ImageControls() {
     } catch (error) {
       console.error(`Error updating ${endpoint}:`, error)
     }
-  }, 400) 
+  }, 400)
 
-  // Unified useEffect to handle all updates
   useEffect(() => {
     const { brightness, contrast, saturation, rotation } = debouncedValues
 
@@ -65,11 +62,20 @@ export default function ImageControls() {
     if (rotation !== 0) updateImage("rotation", rotation)
   }, [debouncedValues])
 
-  // Slider change handler that updates both local and debounced state
   const handleSliderChange = (type: string, value: number) => {
     setDebouncedValues((prev) => ({ ...prev, [type]: value }))
+    updateContextValue(type, value)
+  }
 
-    // Update individual states in the context
+  const handleInputChange = (type: string, value: string) => {
+    const numValue = Number(value)
+    if (!isNaN(numValue)) {
+      setDebouncedValues((prev) => ({ ...prev, [type]: numValue }))
+      updateContextValue(type, numValue)
+    }
+  }
+
+  const updateContextValue = (type: string, value: number) => {
     switch (type) {
       case "brightness":
         setBrightness(value)
@@ -88,56 +94,48 @@ export default function ImageControls() {
     }
   }
 
+  const renderControl = (
+    type: string,
+    value: number,
+    min: number,
+    max: number,
+    step: number
+  ) => (
+    <div className="space-y-2">
+      <div className="flex justify-between items-center">
+        <Label htmlFor={type}>{type.charAt(0).toUpperCase() + type.slice(1)}</Label>
+        <Input
+          type="number"
+          id={`${type}-input`}
+          value={value}
+          onChange={(e) => handleInputChange(type, e.target.value)}
+          className="w-20 text-right"
+          min={min}
+          max={max}
+          step={step}
+        />
+      </div>
+      <Slider
+        id={type}
+        min={min}
+        max={max}
+        step={step}
+        value={[value]}
+        onValueChange={(value) => handleSliderChange(type, value[0])}
+      />
+    </div>
+  )
+
   return (
     <Card className="w-full">
       <CardHeader>
         <CardTitle>Image Controls</CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
-        <div className="space-y-2">
-          <Label htmlFor="brightness">Brightness</Label>
-          <Slider
-            id="brightness"
-            min={0}
-            max={200}
-            step={1}
-            value={[brightness]}
-            onValueChange={(value) => handleSliderChange("brightness", value[0])}
-          />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="contrast">Contrast</Label>
-          <Slider
-            id="contrast"
-            min={0}
-            max={200}
-            step={1}
-            value={[contrast]}
-            onValueChange={(value) => handleSliderChange("contrast", value[0])}
-          />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="saturation">Saturation</Label>
-          <Slider
-            id="saturation"
-            min={0}
-            max={200}
-            step={1}
-            value={[saturation]}
-            onValueChange={(value) => handleSliderChange("saturation", value[0])}
-          />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="rotation">Rotation</Label>
-          <Slider
-            id="rotation"
-            min={0}
-            max={360}
-            step={1}
-            value={[rotation]}
-            onValueChange={(value) => handleSliderChange("rotation", value[0])}
-          />
-        </div>
+        {renderControl("brightness", brightness, 0, 200, 1)}
+        {renderControl("contrast", contrast, 0, 200, 1)}
+        {renderControl("saturation", saturation, 0, 200, 1)}
+        {renderControl("rotation", rotation, 0, 360, 1)}
       </CardContent>
     </Card>
   )
