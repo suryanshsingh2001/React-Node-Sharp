@@ -24,17 +24,20 @@ router.post("/", async (req, res) => {
   const { rotation } = req.body;
 
   try {
-    // Read original image
+    // Read the original high-quality image
     const imageBuffer = fs.readFileSync(originalImagePath);
-    let image = sharp(imageBuffer).rotate(rotation);
 
-    // Save the updated original image
+    // Apply rotation to the original image
+    let image = sharp(imageBuffer).rotate(rotation, { background: { r: 255, g: 255, b: 255, alpha: 0 } });
+
+    // Save the updated original image (if required, you can omit this if you don't want to overwrite)
     await image.toFile(originalImagePath);
 
     // Generate and save the preview image
-    await savePreviewImage(imageBuffer, previewImagePath);
+    const rotatedBuffer = await image.toBuffer(); // Get the rotated image buffer
+    await savePreviewImage(rotatedBuffer, previewImagePath); // Create a preview version from the rotated image
 
-    // Respond with preview URL and cache-busting
+    // Respond with the preview URL and cache-busting
     res.json({
       previewUrl: `${path.basename(previewImagePath)}?t=${Date.now()}`,
     });

@@ -30,14 +30,16 @@ const savePreviewImage = (imageBuffer, filePath) => __awaiter(void 0, void 0, vo
 router.post("/", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { rotation } = req.body;
     try {
-        // Read original image
+        // Read the original high-quality image
         const imageBuffer = fs_1.default.readFileSync(originalImagePath);
-        let image = (0, sharp_1.default)(imageBuffer).rotate(rotation);
-        // Save the updated original image
+        // Apply rotation to the original image
+        let image = (0, sharp_1.default)(imageBuffer).rotate(rotation, { background: { r: 255, g: 255, b: 255, alpha: 0 } });
+        // Save the updated original image (if required, you can omit this if you don't want to overwrite)
         yield image.toFile(originalImagePath);
         // Generate and save the preview image
-        yield savePreviewImage(imageBuffer, previewImagePath);
-        // Respond with preview URL and cache-busting
+        const rotatedBuffer = yield image.toBuffer(); // Get the rotated image buffer
+        yield savePreviewImage(rotatedBuffer, previewImagePath); // Create a preview version from the rotated image
+        // Respond with the preview URL and cache-busting
         res.json({
             previewUrl: `${path_1.default.basename(previewImagePath)}?t=${Date.now()}`,
         });

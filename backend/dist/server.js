@@ -25,7 +25,7 @@ app.use('/api/upload', upload_1.default);
 app.use('/api/brightness', brightness_1.default); //✅
 app.use('/api/contrast', contrast_1.default); //✅
 app.use("/api/saturation", saturation_1.default); //✅
-app.use('/api/rotate', rotation_1.default);
+app.use('/api/rotation', rotation_1.default);
 app.use('/api/crop', crop_1.default);
 app.use('/api/download', download_1.default);
 app.use('/api/reset', download_1.default);

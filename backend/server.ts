@@ -26,7 +26,7 @@ app.use('/api/upload', uploadRoutes);
 app.use('/api/brightness', brightnessRoutes); //✅
 app.use('/api/contrast', contrastRoutes); //✅
 app.use("/api/saturation", saturationRoutes) //✅
-app.use('/api/rotate', rotationRoutes);
+app.use('/api/rotation', rotationRoutes);
 app.use('/api/crop', cropRoutes);
 app.use('/api/download', downloadRoutes);
 app.use('/api/reset', downloadRoutes);
