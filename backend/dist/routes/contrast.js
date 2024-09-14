@@ -17,20 +17,34 @@ const sharp_1 = __importDefault(require("sharp"));
 const path_1 = __importDefault(require("path"));
 const fs_1 = __importDefault(require("fs"));
 const router = express_1.default.Router();
-const imagePath = path_1.default.resolve(process.cwd(), "uploads", `image.jpeg`);
-// POST /api/contrast - Adjust image contrast
-router.post('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const originalImagePath = path_1.default.resolve(process.cwd(), "uploads", `original.jpeg`);
+const previewImagePath = path_1.default.resolve(process.cwd(), "uploads", `preview.jpeg`);
+// Helper function to save preview image
+const savePreviewImage = (imageBuffer, filePath) => __awaiter(void 0, void 0, void 0, function* () {
+    return (0, sharp_1.default)(imageBuffer)
+        .resize(800) // Low-res for preview
+        .jpeg({ quality: 60 }) // Lower quality for speed
+        .toFile(filePath);
+});
+// POST /api/contrast - Adjust image contrast and return a preview
+router.post("/", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { contrast } = req.body;
     try {
-        const imageBuffer = fs_1.default.readFileSync(imagePath);
-        const image = (0, sharp_1.default)(imageBuffer)
-            .linear(contrast / 100, -(128 * (contrast / 100 - 1)));
-        const previewBuffer = yield image.resize(800).jpeg({ quality: 60 }).toBuffer();
-        fs_1.default.writeFileSync(imagePath, previewBuffer);
-        res.json({ previewUrl: `${path_1.default.basename(imagePath)}` });
+        // Read original image
+        const imageBuffer = fs_1.default.readFileSync(originalImagePath);
+        let image = (0, sharp_1.default)(imageBuffer).linear(contrast / 100, -(128 * (contrast / 100 - 1)));
+        // Save the updated original image
+        yield image.toFile(originalImagePath);
+        // Generate and save the preview image
+        yield savePreviewImage(imageBuffer, previewImagePath);
+        // Respond with preview URL and cache-busting
+        res.json({
+            previewUrl: `${path_1.default.basename(previewImagePath)}?t=${Date.now()}`,
+        });
     }
     catch (error) {
-        res.status(500).json({ message: 'Error processing image' });
+        console.error("Error adjusting contrast:", error);
+        res.status(500).json({ message: "Error processing image" });
     }
 }));
 exports.default = router;

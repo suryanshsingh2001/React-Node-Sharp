@@ -6,53 +6,50 @@ import fs from "fs";
 
 const router = express.Router();
 
-// Configure multer to handle image uploads (stored in memory)
+// Configure multer for image uploads
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
-// Define file paths for original and preview images
-const uploadsDir = path.resolve(process.cwd(), "uploads");
-const originalImagePath = path.join(uploadsDir, "original.jpeg");
-const previewImagePath = path.join(uploadsDir, "preview.jpeg");
+// Dynamic file paths (without hardcoding the extension)
+let originalImagePath = "";
+let previewImagePath = "";
 
-// Ensure the uploads directory exists
-if (!fs.existsSync(uploadsDir)) {
-  fs.mkdirSync(uploadsDir);
-}
-
-// Helper function to save high-quality images
-const saveOriginalImage = async (buffer: Buffer, filePath: string) => {
-  return sharp(buffer).jpeg({ quality: 100 }).toFile(filePath);
-};
-
-// Helper function to save low-res preview images
-const savePreviewImage = async (buffer: Buffer, filePath: string) => {
+// Helper function to save the preview image
+const savePreviewImage = async (buffer : Buffer, filePath : any) => {
   return sharp(buffer)
-    .resize(800) // Resize for preview (low-quality)
-    .jpeg({ quality: 60 }) // Lower quality for quick loading
+    .resize(800) // Low-quality, resized preview
+    .jpeg({ quality: 60 }) // Lower quality for speed
     .toFile(filePath);
 };
 
-// POST /api/upload - Handle image uploads
+// POST /api/upload - Handle image uploads and dynamically detect format
 router.post("/", upload.single("image"), async (req, res) => {
   if (!req.file) {
     return res.status(400).json({ message: "No image uploaded!" });
   }
 
   try {
-    // Save both original and preview images
-    await saveOriginalImage(req.file.buffer, originalImagePath);
+    // Use sharp to detect the format of the uploaded image
+    const image = sharp(req.file.buffer);
+    // const metadata = await image.metadata();
+
+    // console.log("Detected image format:", metadata.format);
+
+    // Set image paths with appropriate extension based on detected format
+    // const extension = metadata.format;
+    originalImagePath = path.resolve(process.cwd(), "uploads", `original.jpeg`);
+    previewImagePath = path.resolve(process.cwd(), "uploads", `preview.jpeg`);
+
+    // Save the original image
+    await image.toFile(originalImagePath);
+
+    // Save the preview image
     await savePreviewImage(req.file.buffer, previewImagePath);
 
-    const previewUrl = `preview-image.jpeg`; 
-
-    // Send response with preview URL
-    res.status(200).json({
-      previewUrl,
-      message: "Image uploaded successfully",
-    });
+    const previewUrl = `${path.basename(previewImagePath)}?t=${Date.now()}`;
+    res.status(200).json({ previewUrl, message: "Image uploaded successfully" });
   } catch (error) {
-    console.error("Error saving images:", error);
+    console.error("Error processing image:", error);
     res.status(500).json({ message: "Error processing image" });
   }
 });

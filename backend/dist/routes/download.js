@@ -17,15 +17,18 @@ const sharp_1 = __importDefault(require("sharp"));
 const path_1 = __importDefault(require("path"));
 const fs_1 = __importDefault(require("fs"));
 const router = express_1.default.Router();
-// POST /api/convert - Convert image format (e.g., PNG to JPEG)
 router.post("/", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { format } = req.body; // e.g., 'jpeg', 'png'
-        const imageBuffer = fs_1.default.readFileSync(path_1.default.join(__dirname, "../uploads", "image.jpeg"));
+        const uploadsDir = path_1.default.resolve(process.cwd(), "uploads");
+        const exportDir = path_1.default.resolve(process.cwd(), "exports");
+        const imageBuffer = fs_1.default.readFileSync(path_1.default.join(uploadsDir, "original.jpeg"));
         const convertedImage = yield (0, sharp_1.default)(imageBuffer).toFormat(format).toBuffer();
-        const outputPath = path_1.default.resolve(process.cwd(), "uploads", "original.${format}");
-        fs_1.default.writeFileSync(outputPath, convertedImage);
-        res.json({ previewUrl: `${path_1.default.basename(outputPath)}` });
+        const exportPath = path_1.default.join(exportDir, `original.${format}`);
+        fs_1.default.writeFileSync(exportPath, convertedImage);
+        // Send the preview URL for the frontend to download
+        console.log("Image converted successfully", exportPath);
+        res.status(200).json({ previewUrl: path_1.default.basename(exportPath) });
     }
     catch (error) {
         res.status(500).json({ message: "Error converting image" });

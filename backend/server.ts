@@ -5,7 +5,7 @@ import brightnessRoutes from './routes/brightness';
 import contrastRoutes from './routes/contrast';
 import rotationRoutes from './routes/rotation';
 import cropRoutes from './routes/crop';
-import convertRoutes from './routes/convert';
+import downloadRoutes from './routes/download';
 import path from 'path';
 
 const app = express();
@@ -18,6 +18,7 @@ app.use(cors());
 
 
 app.use('/uploads', express.static(path.join(__dirname, "../", "uploads")));
+app.use('/exports', express.static(path.join(__dirname, "../", "exports")));
 
 // Use the image manipulation routes
 app.use('/api/upload', uploadRoutes);
@@ -25,7 +26,7 @@ app.use('/api/brightness', brightnessRoutes);
 app.use('/api/contrast', contrastRoutes);
 app.use('/api/rotate', rotationRoutes);
 app.use('/api/crop', cropRoutes);
-app.use('/api/convert', convertRoutes);
+app.use('/api/download', downloadRoutes);
 
 const PORT = 5000;
 app.listen(PORT, () => {

@@ -1,41 +1,50 @@
-import { useState } from 'react'
-import { useImageContext } from '../context/ImageContext'
+import { useState } from "react";
+import { useImageContext } from "../context/ImageContext";
+import FileSaver from "file-saver";
 
 export default function ImageDownload() {
-  const { image } = useImageContext()
-  const [format, setFormat] = useState<'png' | 'jpeg'>('png')
+  const { image } = useImageContext();
+  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
+  const downloadUrl = import.meta.env.VITE_DOWNLOAD_URL;
+
+  const [format, setFormat] = useState<"png" | "jpeg">("png");
 
   const handleDownload = async () => {
-    if (!image) return
+    if (!image) return;
 
     try {
-      const response = await fetch('/api/download', {
-        method: 'POST',
+      // Fetch the download URL from the server
+      const response = await fetch(`${apiBaseUrl}/download`, {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ format }),
-      })
+      });
 
-      const blob = await response.blob()
-      const url = window.URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.style.display = 'none'
-      a.href = url
-      a.download = `processed_image.${format}`
-      document.body.appendChild(a)
-      a.click()
-      window.URL.revokeObjectURL(url)
+      if (!response.ok) {
+        throw new Error("Failed to get download URL");
+      }
+
+      // Get the URL to download the image
+      const { previewUrl } = await response.json();
+
+      console.log("previewUrl:", previewUrl);
+
+      // Directly trigger a download via the URL
+      const url = `${downloadUrl}/${previewUrl}`;
+
+      FileSaver.saveAs(url, `processed.${format}`);
     } catch (error) {
-      console.error('Error downloading image:', error)
+      console.error("Error downloading image:", error);
     }
-  }
+  };
 
   return (
     <div className="mt-4">
       <select
         value={format}
-        onChange={(e) => setFormat(e.target.value as 'png' | 'jpeg')}
+        onChange={(e) => setFormat(e.target.value as "png" | "jpeg")}
         className="block w-full p-2 mb-2 border rounded"
       >
         <option value="png">PNG</option>
@@ -49,5 +58,5 @@ export default function ImageDownload() {
         Download Processed Image
       </button>
     </div>
-  )
+  );
 }

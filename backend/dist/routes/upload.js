@@ -16,48 +16,43 @@ const express_1 = __importDefault(require("express"));
 const multer_1 = __importDefault(require("multer"));
 const sharp_1 = __importDefault(require("sharp"));
 const path_1 = __importDefault(require("path"));
-const fs_1 = __importDefault(require("fs"));
 const router = express_1.default.Router();
-// Configure multer to handle image uploads (stored in memory)
+// Configure multer for image uploads
 const storage = multer_1.default.memoryStorage();
 const upload = (0, multer_1.default)({ storage });
-// Define file paths for original and preview images
-const uploadsDir = path_1.default.resolve(process.cwd(), "uploads");
-const originalImagePath = path_1.default.join(uploadsDir, "original.jpeg");
-const previewImagePath = path_1.default.join(uploadsDir, "preview.jpeg");
-// Ensure the uploads directory exists
-if (!fs_1.default.existsSync(uploadsDir)) {
-    fs_1.default.mkdirSync(uploadsDir);
-}
-// Helper function to save high-quality images
-const saveOriginalImage = (buffer, filePath) => __awaiter(void 0, void 0, void 0, function* () {
-    return (0, sharp_1.default)(buffer).jpeg({ quality: 100 }).toFile(filePath);
-});
-// Helper function to save low-res preview images
+// Dynamic file paths (without hardcoding the extension)
+let originalImagePath = "";
+let previewImagePath = "";
+// Helper function to save the preview image
 const savePreviewImage = (buffer, filePath) => __awaiter(void 0, void 0, void 0, function* () {
     return (0, sharp_1.default)(buffer)
-        .resize(800) // Resize for preview (low-quality)
-        .jpeg({ quality: 60 }) // Lower quality for quick loading
+        .resize(800) // Low-quality, resized preview
+        .jpeg({ quality: 60 }) // Lower quality for speed
         .toFile(filePath);
 });
-// POST /api/upload - Handle image uploads
+// POST /api/upload - Handle image uploads and dynamically detect format
 router.post("/", upload.single("image"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     if (!req.file) {
         return res.status(400).json({ message: "No image uploaded!" });
     }
     try {
-        // Save both original and preview images
-        yield saveOriginalImage(req.file.buffer, originalImagePath);
+        // Use sharp to detect the format of the uploaded image
+        const image = (0, sharp_1.default)(req.file.buffer);
+        // const metadata = await image.metadata();
+        // console.log("Detected image format:", metadata.format);
+        // Set image paths with appropriate extension based on detected format
+        // const extension = metadata.format;
+        originalImagePath = path_1.default.resolve(process.cwd(), "uploads", `original.jpeg`);
+        previewImagePath = path_1.default.resolve(process.cwd(), "uploads", `preview.jpeg`);
+        // Save the original image
+        yield image.toFile(originalImagePath);
+        // Save the preview image
         yield savePreviewImage(req.file.buffer, previewImagePath);
-        const previewUrl = `preview-image.jpeg`;
-        // Send response with preview URL
-        res.status(200).json({
-            previewUrl,
-            message: "Image uploaded successfully",
-        });
+        const previewUrl = `${path_1.default.basename(previewImagePath)}?t=${Date.now()}`;
+        res.status(200).json({ previewUrl, message: "Image uploaded successfully" });
     }
     catch (error) {
-        console.error("Error saving images:", error);
+        console.error("Error processing image:", error);
         res.status(500).json({ message: "Error processing image" });
     }
 }));

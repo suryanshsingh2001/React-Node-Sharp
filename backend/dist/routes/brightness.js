@@ -17,20 +17,30 @@ const sharp_1 = __importDefault(require("sharp"));
 const path_1 = __importDefault(require("path"));
 const fs_1 = __importDefault(require("fs"));
 const router = express_1.default.Router();
-// Paths for original and preview images
+// Directory for uploads
 const uploadsDir = path_1.default.resolve(process.cwd(), "uploads");
-const originalImagePath = path_1.default.join(uploadsDir, "original.jpeg");
-const previewImagePath = path_1.default.join(uploadsDir, "preview.jpeg");
+// Dynamic paths for the original and preview images
+let originalImagePath = "";
+let previewImagePath = "";
 // Ensure the uploads directory exists
 if (!fs_1.default.existsSync(uploadsDir)) {
     fs_1.default.mkdirSync(uploadsDir);
 }
-// Helper function to save preview images
-const savePreviewImage = (imageBuffer, filePath) => __awaiter(void 0, void 0, void 0, function* () {
+// Helper function to detect the image format and set the paths
+const setImagePaths = (imageBuffer) => __awaiter(void 0, void 0, void 0, function* () {
+    const image = (0, sharp_1.default)(imageBuffer);
+    const metadata = yield image.metadata();
+    const extension = metadata.format;
+    // Set the paths based on the detected format
+    originalImagePath = path_1.default.join(uploadsDir, `original.${extension}`);
+    previewImagePath = path_1.default.join(uploadsDir, `preview.jpeg`); // Preview is always saved as JPEG
+});
+// Helper function to save the preview image
+const savePreviewImage = (imageBuffer) => __awaiter(void 0, void 0, void 0, function* () {
     return (0, sharp_1.default)(imageBuffer)
         .resize(800) // Resize for preview (low-quality)
-        .jpeg({ quality: 80 }) // Lower quality for preview
-        .toFile(filePath);
+        .jpeg({ quality: 80 }) // Preview always as JPEG with lower quality
+        .toFile(previewImagePath);
 });
 // POST /api/brightness - Adjust image brightness
 router.post("/", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -39,13 +49,17 @@ router.post("/", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         // Load the original image
         const imageBuffer = fs_1.default.readFileSync(originalImagePath);
-        let image = (0, sharp_1.default)(imageBuffer);
-        // Adjust brightness
-        image = image.modulate({ brightness: brightness / 100 });
-        // Save the updated original image
-        yield image.toFile(originalImagePath); // Overwrite the original
+        // Set the image paths dynamically if not already set (in case of first-time processing)
+        if (!originalImagePath) {
+            yield setImagePaths(imageBuffer);
+        }
+        // Create the sharp instance and adjust brightness
+        let image = (0, sharp_1.default)(imageBuffer).modulate({ brightness: brightness / 100 });
+        // Save the updated original image (overwrite the original)
+        yield image.toFile(originalImagePath);
         // Generate and save the preview image
-        yield savePreviewImage(imageBuffer, previewImagePath);
+        const previewBuffer = yield image.clone().resize(800).jpeg({ quality: 80 }).toBuffer();
+        fs_1.default.writeFileSync(previewImagePath, previewBuffer);
         // Return the preview URL with cache-busting
         res.json({ previewUrl: `${path_1.default.basename(previewImagePath)}?t=${Date.now()}` });
     }
