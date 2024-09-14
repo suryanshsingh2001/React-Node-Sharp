@@ -17,7 +17,7 @@ const sharp_1 = __importDefault(require("sharp"));
 const path_1 = __importDefault(require("path"));
 const fs_1 = __importDefault(require("fs"));
 const router = express_1.default.Router();
-const imagePath = path_1.default.resolve(process.cwd(), "uploads", `image.jpeg`);
+const imagePath = path_1.default.resolve(process.cwd(), "uploads", `original.jpeg`);
 const previewPath = path_1.default.resolve(process.cwd(), "uploads", `preview.jpeg`);
 // POST /api/rotate - Rotate the image and delete the previous version
 router.post("/", (req, res) => __awaiter(void 0, void 0, void 0, function* () {

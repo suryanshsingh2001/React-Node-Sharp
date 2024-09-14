@@ -4,31 +4,49 @@ import path from "path";
 import fs from "fs";
 
 const router = express.Router();
-const imagePath = path.resolve(process.cwd(), "uploads", `image.jpeg`);
-const previewPath = path.resolve(process.cwd(), "uploads", `preview.jpeg`);
+
+// Paths for original and preview images
+const uploadsDir = path.resolve(process.cwd(), "uploads");
+const originalImagePath = path.join(uploadsDir, "original.jpeg");
+const previewImagePath = path.join(uploadsDir, "preview.jpeg");
+
+// Ensure the uploads directory exists
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir);
+}
+
+// Helper function to save preview images
+const savePreviewImage = async (imageBuffer: Buffer, filePath: string) => {
+  return sharp(imageBuffer)
+    .resize(800) // Resize for preview (low-quality)
+    .jpeg({ quality: 80 }) // Lower quality for preview
+    .toFile(filePath);
+};
 
 // POST /api/brightness - Adjust image brightness
 router.post("/", async (req, res) => {
   const { brightness } = req.body;
 
-  console.log(`brightness` + brightness);
+  console.log(`Adjusting brightness to: ${brightness}`);
 
   try {
-    // if (fs.existsSync(previewPath)) {
-    //   fs.unlinkSync(previewPath);
-    // }
+    // Load the original image
+    const imageBuffer = fs.readFileSync(originalImagePath);
+    let image = sharp(imageBuffer);
 
-    const imageBuffer = fs.readFileSync(imagePath);
-    const image = sharp(imageBuffer).modulate({ brightness: brightness / 100 });
+    // Adjust brightness
+    image = image.modulate({ brightness: brightness / 100 });
 
-    const previewBuffer = await image
-      .resize(800)
-      .jpeg({ quality: 80 })
-      .toBuffer();
-    fs.writeFileSync(previewPath, previewBuffer);
+    // Save the updated original image
+    await image.toFile(originalImagePath); // Overwrite the original
 
-    res.json({ previewUrl: `${path.basename(previewPath)}?t=${Date.now()}` });
+    // Generate and save the preview image
+    await savePreviewImage(imageBuffer, previewImagePath);
+
+    // Return the preview URL with cache-busting
+    res.json({ previewUrl: `${path.basename(previewImagePath)}?t=${Date.now()}` });
   } catch (error) {
+    console.error("Error processing image:", error);
     res.status(500).json({ message: "Error processing image" });
   }
 });

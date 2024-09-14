@@ -16,42 +16,48 @@ const express_1 = __importDefault(require("express"));
 const multer_1 = __importDefault(require("multer"));
 const sharp_1 = __importDefault(require("sharp"));
 const path_1 = __importDefault(require("path"));
+const fs_1 = __importDefault(require("fs"));
 const router = express_1.default.Router();
-// Configure multer to handle image uploads
+// Configure multer to handle image uploads (stored in memory)
 const storage = multer_1.default.memoryStorage();
 const upload = (0, multer_1.default)({ storage });
-// Resolve the image path relative to the project root
-const imagePath = path_1.default.resolve(process.cwd(), "uploads", `image.jpeg`);
-const previewPath = path_1.default.resolve(process.cwd(), "uploads", `preview.jpeg`);
-// Helper function to save images
+// Define file paths for original and preview images
+const uploadsDir = path_1.default.resolve(process.cwd(), "uploads");
+const originalImagePath = path_1.default.join(uploadsDir, "original.jpeg");
+const previewImagePath = path_1.default.join(uploadsDir, "preview.jpeg");
+// Ensure the uploads directory exists
+if (!fs_1.default.existsSync(uploadsDir)) {
+    fs_1.default.mkdirSync(uploadsDir);
+}
+// Helper function to save high-quality images
+const saveOriginalImage = (buffer, filePath) => __awaiter(void 0, void 0, void 0, function* () {
+    return (0, sharp_1.default)(buffer).jpeg({ quality: 100 }).toFile(filePath);
+});
+// Helper function to save low-res preview images
 const savePreviewImage = (buffer, filePath) => __awaiter(void 0, void 0, void 0, function* () {
     return (0, sharp_1.default)(buffer)
-        .resize(800) // Resize image for preview (low-quality)
-        .jpeg({ quality: 60 }) // Lower quality for speed
-        .toFile(filePath);
-});
-const saveOriginalImage = (buffer, filePath) => __awaiter(void 0, void 0, void 0, function* () {
-    return (0, sharp_1.default)(buffer)
+        .resize(800) // Resize for preview (low-quality)
+        .jpeg({ quality: 60 }) // Lower quality for quick loading
         .toFile(filePath);
 });
 // POST /api/upload - Handle image uploads
 router.post("/", upload.single("image"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    console.log(req.file);
-    console.log(imagePath); // This will now log the correct path to the 'uploads' folder
     if (!req.file) {
         return res.status(400).json({ message: "No image uploaded!" });
     }
     try {
-        yield saveOriginalImage(req.file.buffer, imagePath);
-        yield savePreviewImage(req.file.buffer, previewPath);
-        const previewUrl = `${path_1.default.basename(imagePath)}`; // Adjusted URL for frontend
-        console.log(previewUrl);
-        // Send success response
-        res
-            .status(200)
-            .json({ previewUrl, message: "Image uploaded successfully" });
+        // Save both original and preview images
+        yield saveOriginalImage(req.file.buffer, originalImagePath);
+        yield savePreviewImage(req.file.buffer, previewImagePath);
+        const previewUrl = `preview-image.jpeg`;
+        // Send response with preview URL
+        res.status(200).json({
+            previewUrl,
+            message: "Image uploaded successfully",
+        });
     }
     catch (error) {
+        console.error("Error saving images:", error);
         res.status(500).json({ message: "Error processing image" });
     }
 }));

@@ -17,26 +17,40 @@ const sharp_1 = __importDefault(require("sharp"));
 const path_1 = __importDefault(require("path"));
 const fs_1 = __importDefault(require("fs"));
 const router = express_1.default.Router();
-const imagePath = path_1.default.resolve(process.cwd(), "uploads", `image.jpeg`);
-const previewPath = path_1.default.resolve(process.cwd(), "uploads", `preview.jpeg`);
+// Paths for original and preview images
+const uploadsDir = path_1.default.resolve(process.cwd(), "uploads");
+const originalImagePath = path_1.default.join(uploadsDir, "original.jpeg");
+const previewImagePath = path_1.default.join(uploadsDir, "preview.jpeg");
+// Ensure the uploads directory exists
+if (!fs_1.default.existsSync(uploadsDir)) {
+    fs_1.default.mkdirSync(uploadsDir);
+}
+// Helper function to save preview images
+const savePreviewImage = (imageBuffer, filePath) => __awaiter(void 0, void 0, void 0, function* () {
+    return (0, sharp_1.default)(imageBuffer)
+        .resize(800) // Resize for preview (low-quality)
+        .jpeg({ quality: 80 }) // Lower quality for preview
+        .toFile(filePath);
+});
 // POST /api/brightness - Adjust image brightness
 router.post("/", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { brightness } = req.body;
-    console.log(`brightness` + brightness);
+    console.log(`Adjusting brightness to: ${brightness}`);
     try {
-        // if (fs.existsSync(previewPath)) {
-        //   fs.unlinkSync(previewPath);
-        // }
-        const imageBuffer = fs_1.default.readFileSync(imagePath);
-        const image = (0, sharp_1.default)(imageBuffer).modulate({ brightness: brightness / 100 });
-        const previewBuffer = yield image
-            .resize(800)
-            .jpeg({ quality: 80 })
-            .toBuffer();
-        fs_1.default.writeFileSync(previewPath, previewBuffer);
-        res.json({ previewUrl: `${path_1.default.basename(previewPath)}?t=${Date.now()}` });
+        // Load the original image
+        const imageBuffer = fs_1.default.readFileSync(originalImagePath);
+        let image = (0, sharp_1.default)(imageBuffer);
+        // Adjust brightness
+        image = image.modulate({ brightness: brightness / 100 });
+        // Save the updated original image
+        yield image.toFile(originalImagePath); // Overwrite the original
+        // Generate and save the preview image
+        yield savePreviewImage(imageBuffer, previewImagePath);
+        // Return the preview URL with cache-busting
+        res.json({ previewUrl: `${path_1.default.basename(previewImagePath)}?t=${Date.now()}` });
     }
     catch (error) {
+        console.error("Error processing image:", error);
         res.status(500).json({ message: "Error processing image" });
     }
 }));

@@ -4,7 +4,7 @@ import path from "path";
 import fs from "fs";
 
 const router = express.Router();
-const imagePath = path.resolve(process.cwd(), "uploads", `image.jpeg`);
+const imagePath = path.resolve(process.cwd(), "uploads", `original.jpeg`);
 const previewPath = path.resolve(process.cwd(), "uploads", `preview.jpeg`);
 
 // POST /api/rotate - Rotate the image and delete the previous version

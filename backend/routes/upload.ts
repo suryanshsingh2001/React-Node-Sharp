@@ -1,49 +1,60 @@
-  import express from "express";
-  import multer from "multer";
-  import sharp from "sharp";
-  import path from "path";
-  import fs from "fs";
+import express from "express";
+import multer from "multer";
+import sharp from "sharp";
+import path from "path";
+import fs from "fs";
 
-  const router = express.Router();
+const router = express.Router();
 
-  // Configure multer to handle image uploads
-  const storage = multer.memoryStorage();
-  const upload = multer({ storage });
+// Configure multer to handle image uploads (stored in memory)
+const storage = multer.memoryStorage();
+const upload = multer({ storage });
 
-  // Resolve the image path relative to the project root
-  const imagePath = path.resolve(process.cwd(), "uploads", `image.jpeg`);
-  const previewPath = path.resolve(process.cwd(), "uploads", `preview.jpeg`);
+// Define file paths for original and preview images
+const uploadsDir = path.resolve(process.cwd(), "uploads");
+const originalImagePath = path.join(uploadsDir, "original.jpeg");
+const previewImagePath = path.join(uploadsDir, "preview.jpeg");
 
-  // Helper function to save images
-  const savePreviewImage = async (buffer: Buffer, filePath: string) => {
-    return sharp(buffer)
-      .resize(800) // Resize image for preview (low-quality)
-      .jpeg({ quality: 60 }) // Lower quality for speed
-      .toFile(filePath);
-  };
+// Ensure the uploads directory exists
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir);
+}
 
-  // POST /api/upload - Handle image uploads
-  router.post("/", upload.single("image"), async (req, res) => {
+// Helper function to save high-quality images
+const saveOriginalImage = async (buffer: Buffer, filePath: string) => {
+  return sharp(buffer).jpeg({ quality: 100 }).toFile(filePath);
+};
 
-    console.log(req.file);
-    console.log(imagePath); // This will now log the correct path to the 'uploads' folder
+// Helper function to save low-res preview images
+const savePreviewImage = async (buffer: Buffer, filePath: string) => {
+  return sharp(buffer)
+    .resize(800) // Resize for preview (low-quality)
+    .jpeg({ quality: 60 }) // Lower quality for quick loading
+    .toFile(filePath);
+};
 
-    if (!req.file) {
-      return res.status(400).json({ message: "No image uploaded!" });
-    }
+// POST /api/upload - Handle image uploads
+router.post("/", upload.single("image"), async (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ message: "No image uploaded!" });
+  }
 
-    try {
-      await savePreviewImage(req.file.buffer, imagePath);
-      const previewUrl = `${path.basename(imagePath)}`; // Adjusted URL for frontend
-      console.log(previewUrl);
+  try {
+    // Save both original and preview images
+    await saveOriginalImage(req.file.buffer, originalImagePath);
+    await savePreviewImage(req.file.buffer, previewImagePath);
 
-      // Send success response
-      res
-        .status(200)
-        .json({ previewUrl, message: "Image uploaded successfully" });
-    } catch (error) {
-      res.status(500).json({ message: "Error processing image" });
-    }
-  });
+    const previewUrl = `preview-image.jpeg`; 
 
-  export default router;
+    // Send response with preview URL
+    res.status(200).json({
+      previewUrl,
+      message: "Image uploaded successfully",
+    });
+  } catch (error) {
+    console.error("Error saving images:", error);
+    res.status(500).json({ message: "Error processing image" });
+  }
+});
+
+export default router;
