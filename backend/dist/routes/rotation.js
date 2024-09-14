@@ -17,19 +17,28 @@ const sharp_1 = __importDefault(require("sharp"));
 const path_1 = __importDefault(require("path"));
 const fs_1 = __importDefault(require("fs"));
 const router = express_1.default.Router();
-// POST /api/rotate - Rotate the image
-router.post('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const imagePath = path_1.default.resolve(process.cwd(), "uploads", `image.jpeg`);
+const previewPath = path_1.default.resolve(process.cwd(), "uploads", `preview.jpeg`);
+// POST /api/rotate - Rotate the image and delete the previous version
+router.post("/", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { rotation } = req.body;
     try {
-        const imageBuffer = fs_1.default.readFileSync(path_1.default.join(__dirname, '../uploads', 'image.jpeg'));
+        // Check if a previous preview image exists and delete it
+        // if (fs.existsSync(previewPath)) {
+        //   fs.unlinkSync(previewPath);
+        // }
+        const imageBuffer = fs_1.default.readFileSync(imagePath);
         const image = (0, sharp_1.default)(imageBuffer).rotate(rotation);
-        const previewBuffer = yield image.resize(800).jpeg({ quality: 60 }).toBuffer();
-        const previewPath = path_1.default.join(__dirname, '../uploads', `${Date.now()}.jpeg`);
+        const previewBuffer = yield image
+            .resize(800)
+            .jpeg({ quality: 60 })
+            .toBuffer();
         fs_1.default.writeFileSync(previewPath, previewBuffer);
-        res.json({ previewUrl: `${path_1.default.basename(previewPath)}` });
+        // Append a cache-busting query string (timestamp)
+        res.json({ previewUrl: `${path_1.default.basename(previewPath)}?t=${Date.now()}` });
     }
     catch (error) {
-        res.status(500).json({ message: 'Error rotating image' });
+        res.status(500).json({ message: "Error rotating image" });
     }
 }));
 exports.default = router;

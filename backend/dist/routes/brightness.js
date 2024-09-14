@@ -18,20 +18,26 @@ const path_1 = __importDefault(require("path"));
 const fs_1 = __importDefault(require("fs"));
 const router = express_1.default.Router();
 const imagePath = path_1.default.resolve(process.cwd(), "uploads", `image.jpeg`);
+const previewPath = path_1.default.resolve(process.cwd(), "uploads", `preview.jpeg`);
 // POST /api/brightness - Adjust image brightness
-router.post('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+router.post("/", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { brightness } = req.body;
+    console.log(`brightness` + brightness);
     try {
+        // if (fs.existsSync(previewPath)) {
+        //   fs.unlinkSync(previewPath);
+        // }
         const imageBuffer = fs_1.default.readFileSync(imagePath);
-        const image = (0, sharp_1.default)(imageBuffer)
-            .modulate({ brightness: brightness / 100 });
-        const previewBuffer = yield image.resize(800).jpeg({ quality: 60 }).toBuffer();
-        fs_1.default.writeFileSync(imagePath, previewBuffer);
-        console.log(imagePath);
-        res.json({ previewUrl: `${path_1.default.basename(imagePath)}` });
+        const image = (0, sharp_1.default)(imageBuffer).modulate({ brightness: brightness / 100 });
+        const previewBuffer = yield image
+            .resize(800)
+            .jpeg({ quality: 80 })
+            .toBuffer();
+        fs_1.default.writeFileSync(previewPath, previewBuffer);
+        res.json({ previewUrl: `${path_1.default.basename(previewPath)}?t=${Date.now()}` });
     }
     catch (error) {
-        res.status(500).json({ message: 'Error processing image' });
+        res.status(500).json({ message: "Error processing image" });
     }
 }));
 exports.default = router;

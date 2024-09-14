@@ -43,7 +43,7 @@ export default function ImageControls() {
   useEffect(() => {
     const updateContrast = async () => {
       try {
-        const response = await fetch("/api/contrast", {
+        const response = await fetch(`${apiBaseUrl}/contrast`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -51,7 +51,7 @@ export default function ImageControls() {
           body: JSON.stringify({ contrast }),
         });
         const data = await response.json();
-        setPreview(data.previewUrl);
+        setPreview(`${storageUrl}/${data.previewUrl}`);
       } catch (error) {
         console.error("Error processing contrast:", error);
       }
@@ -83,7 +83,7 @@ export default function ImageControls() {
   useEffect(() => {
     const updateRotation = async () => {
       try {
-        const response = await fetch("/api/rotate", {
+        const response = await fetch(`${apiBaseUrl}/rotate`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -91,7 +91,7 @@ export default function ImageControls() {
           body: JSON.stringify({ rotation }),
         });
         const data = await response.json();
-        setPreview(data.previewUrl);
+        setPreview(`${storageUrl}/${data.previewUrl}`);
       } catch (error) {
         console.error("Error rotating image:", error);
       }

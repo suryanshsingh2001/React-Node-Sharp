@@ -22,11 +22,16 @@ const storage = multer_1.default.memoryStorage();
 const upload = (0, multer_1.default)({ storage });
 // Resolve the image path relative to the project root
 const imagePath = path_1.default.resolve(process.cwd(), "uploads", `image.jpeg`);
+const previewPath = path_1.default.resolve(process.cwd(), "uploads", `preview.jpeg`);
 // Helper function to save images
-const saveImage = (buffer, filePath) => __awaiter(void 0, void 0, void 0, function* () {
+const savePreviewImage = (buffer, filePath) => __awaiter(void 0, void 0, void 0, function* () {
     return (0, sharp_1.default)(buffer)
         .resize(800) // Resize image for preview (low-quality)
         .jpeg({ quality: 60 }) // Lower quality for speed
+        .toFile(filePath);
+});
+const saveOriginalImage = (buffer, filePath) => __awaiter(void 0, void 0, void 0, function* () {
+    return (0, sharp_1.default)(buffer)
         .toFile(filePath);
 });
 // POST /api/upload - Handle image uploads
@@ -37,7 +42,8 @@ router.post("/", upload.single("image"), (req, res) => __awaiter(void 0, void 0,
         return res.status(400).json({ message: "No image uploaded!" });
     }
     try {
-        yield saveImage(req.file.buffer, imagePath);
+        yield saveOriginalImage(req.file.buffer, imagePath);
+        yield savePreviewImage(req.file.buffer, previewPath);
         const previewUrl = `${path_1.default.basename(imagePath)}`; // Adjusted URL for frontend
         console.log(previewUrl);
         // Send success response
