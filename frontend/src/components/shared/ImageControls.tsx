@@ -52,6 +52,8 @@ export default function ImageControls() {
         });
         const data = await response.json();
         setPreview(`${storageUrl}/${data.previewUrl}`);
+
+        console.log(data.previewUrl);
       } catch (error) {
         console.error("Error processing contrast:", error);
       }
@@ -63,7 +65,7 @@ export default function ImageControls() {
   useEffect(() => {
     const updateSaturation = async () => {
       try {
-        const response = await fetch("/api/saturation", {
+        const response = await fetch(`${apiBaseUrl}/saturation`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -71,7 +73,9 @@ export default function ImageControls() {
           body: JSON.stringify({ saturation }),
         });
         const data = await response.json();
-        setPreview(data.previewUrl);
+        setPreview(`${storageUrl}/${data.previewUrl}`);
+
+        console.log(data.previewUrl);
       } catch (error) {
         console.error("Error processing saturation:", error);
       }

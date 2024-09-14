@@ -5,6 +5,7 @@ import brightnessRoutes from './routes/brightness';
 import contrastRoutes from './routes/contrast';
 import rotationRoutes from './routes/rotation';
 import cropRoutes from './routes/crop';
+import saturationRoutes from './routes/saturation';
 import downloadRoutes from './routes/download';
 import path from 'path';
 
@@ -21,9 +22,10 @@ app.use('/uploads', express.static(path.join(__dirname, "../", "uploads")));
 app.use('/exports', express.static(path.join(__dirname, "../", "exports")));
 
 // Use the image manipulation routes
-app.use('/api/upload', uploadRoutes);
-app.use('/api/brightness', brightnessRoutes);
-app.use('/api/contrast', contrastRoutes);
+app.use('/api/upload', uploadRoutes); 
+app.use('/api/brightness', brightnessRoutes); //✅
+app.use('/api/contrast', contrastRoutes); //✅
+app.use("/api/saturation", saturationRoutes) //✅
 app.use('/api/rotate', rotationRoutes);
 app.use('/api/crop', cropRoutes);
 app.use('/api/download', downloadRoutes);

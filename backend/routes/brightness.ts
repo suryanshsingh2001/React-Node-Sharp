@@ -5,35 +5,22 @@ import fs from "fs";
 
 const router = express.Router();
 
-// Directory for uploads
+// Paths for original and preview images
 const uploadsDir = path.resolve(process.cwd(), "uploads");
-
-// Dynamic paths for the original and preview images
-let originalImagePath = "";
-let previewImagePath = "";
+const originalImagePath = path.join(uploadsDir, "original.jpeg");
+const previewImagePath = path.join(uploadsDir, "preview.jpeg");
 
 // Ensure the uploads directory exists
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir);
 }
 
-// Helper function to detect the image format and set the paths
-const setImagePaths = async (imageBuffer : Buffer) => {
-  const image = sharp(imageBuffer);
-  const metadata = await image.metadata();
-  const extension = metadata.format;
-
-  // Set the paths based on the detected format
-  originalImagePath = path.join(uploadsDir, `original.${extension}`);
-  previewImagePath = path.join(uploadsDir, `preview.jpeg`); // Preview is always saved as JPEG
-};
-
-// Helper function to save the preview image
-const savePreviewImage = async (imageBuffer : Buffer) => {
+// Helper function to save preview images
+const savePreviewImage = async (imageBuffer: Buffer, filePath: string) => {
   return sharp(imageBuffer)
     .resize(800) // Resize for preview (low-quality)
-    .jpeg({ quality: 80 }) // Preview always as JPEG with lower quality
-    .toFile(previewImagePath);
+    .jpeg({ quality: 80 }) // Lower quality for preview
+    .toFile(filePath);
 };
 
 // POST /api/brightness - Adjust image brightness
@@ -45,21 +32,16 @@ router.post("/", async (req, res) => {
   try {
     // Load the original image
     const imageBuffer = fs.readFileSync(originalImagePath);
+    let image = sharp(imageBuffer);
 
-    // Set the image paths dynamically if not already set (in case of first-time processing)
-    if (!originalImagePath) {
-      await setImagePaths(imageBuffer);
-    }
+    // Adjust brightness
+    image = image.modulate({ brightness: brightness / 100 });
 
-    // Create the sharp instance and adjust brightness
-    let image = sharp(imageBuffer).modulate({ brightness: brightness / 100 });
-
-    // Save the updated original image (overwrite the original)
-    await image.toFile(originalImagePath);
+    // Save the updated original image
+    await image.toFile(originalImagePath); // Overwrite the original
 
     // Generate and save the preview image
-    const previewBuffer = await image.clone().resize(800).jpeg({ quality: 80 }).toBuffer();
-    fs.writeFileSync(previewImagePath, previewBuffer);
+    await savePreviewImage(imageBuffer, previewImagePath);
 
     // Return the preview URL with cache-busting
     res.json({ previewUrl: `${path.basename(previewImagePath)}?t=${Date.now()}` });
