@@ -9,7 +9,7 @@ export default function ImagePreview() {
       {preview ? (
         <img src={preview} alt="Preview" className="w-full h-auto" />
       ) : (
-        <div className="h-64 flex items-center justify-center bg-gray-100 text-gray-400">
+        <div className=" flex items-center justify-center bg-gray-100 text-gray-400 h-screen">
           No image uploaded
         </div>
       )}

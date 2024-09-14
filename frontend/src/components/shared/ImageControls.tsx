@@ -1,11 +1,14 @@
-import { useEffect } from "react";
-import { useImageContext } from "../context/ImageContext";
+'use client'
+
+import { useEffect } from "react"
+import { useImageContext } from "../context/ImageContext"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Slider } from "@/components/ui/slider"
+import { Label } from "@/components/ui/label"
 
 export default function ImageControls() {
-
-
-  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
-  const storageUrl = import.meta.env.VITE_STORAGE_URL;
+  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL
+  const storageUrl = import.meta.env.VITE_STORAGE_URL
   const {
     brightness,
     setBrightness,
@@ -16,164 +19,92 @@ export default function ImageControls() {
     rotation,
     setRotation,
     setPreview,
-  } = useImageContext();
+  } = useImageContext()
 
-  // Separate useEffect hooks for each manipulation task
-  useEffect(() => {
-    const updateBrightness = async () => {
-      try {
-        const response = await fetch(`${apiBaseUrl}/brightness`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ brightness }),
-        });
-        const data = await response.json();
-      
-        setPreview(`${storageUrl}/${data.previewUrl}`);
-      } catch (error) {
-        console.error("Error processing brightness:", error);
-      }
-    };
-
-    if (brightness !== 100) updateBrightness();
-  }, [brightness]);
+  const updateImage = async (endpoint: string, value: number, setter: (value: number) => void) => {
+    try {
+      const response = await fetch(`${apiBaseUrl}/${endpoint}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ [endpoint]: value }),
+      })
+      const data = await response.json()
+      setPreview(`${storageUrl}/${data.previewUrl}`)
+      setter(value)
+    } catch (error) {
+      console.error(`Error processing ${endpoint}:`, error)
+    }
+  }
 
   useEffect(() => {
-    const updateContrast = async () => {
-      try {
-        const response = await fetch(`${apiBaseUrl}/contrast`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ contrast }),
-        });
-        const data = await response.json();
-        setPreview(`${storageUrl}/${data.previewUrl}`);
-
-        console.log(data.previewUrl);
-      } catch (error) {
-        console.error("Error processing contrast:", error);
-      }
-    };
-
-    if (contrast !== 100) updateContrast();
-  }, [contrast]);
+    if (brightness !== 100) updateImage("brightness", brightness, setBrightness)
+  }, [brightness])
 
   useEffect(() => {
-    const updateSaturation = async () => {
-      try {
-        const response = await fetch(`${apiBaseUrl}/saturation`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ saturation }),
-        });
-        const data = await response.json();
-        setPreview(`${storageUrl}/${data.previewUrl}`);
-
-        console.log(data.previewUrl);
-      } catch (error) {
-        console.error("Error processing saturation:", error);
-      }
-    };
-
-    if (saturation !== 100) updateSaturation();
-  }, [saturation]);
+    if (contrast !== 100) updateImage("contrast", contrast, setContrast)
+  }, [contrast])
 
   useEffect(() => {
-    const updateRotation = async () => {
-      try {
-        const response = await fetch(`${apiBaseUrl}/rotate`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ rotation }),
-        });
-        const data = await response.json();
-        setPreview(`${storageUrl}/${data.previewUrl}`);
-      } catch (error) {
-        console.error("Error rotating image:", error);
-      }
-    };
+    if (saturation !== 100) updateImage("saturation", saturation, setSaturation)
+  }, [saturation])
 
-    if (rotation !== 0) updateRotation();
-  }, [rotation]);
+  useEffect(() => {
+    if (rotation !== 0) updateImage("rotate", rotation, setRotation)
+  }, [rotation])
 
   return (
-    <div className="space-y-4">
-      <div>
-        <label
-          htmlFor="brightness"
-          className="block text-sm font-medium text-gray-700"
-        >
-          Brightness
-        </label>
-        <input
-          type="range"
-          id="brightness"
-          min="0"
-          max="200"
-          value={brightness}
-          onChange={(e) => setBrightness(Number(e.target.value))}
-          className="w-full"
-        />
-      </div>
-      <div>
-        <label
-          htmlFor="contrast"
-          className="block text-sm font-medium text-gray-700"
-        >
-          Contrast
-        </label>
-        <input
-          type="range"
-          id="contrast"
-          min="0"
-          max="200"
-          value={contrast}
-          onChange={(e) => setContrast(Number(e.target.value))}
-          className="w-full"
-        />
-      </div>
-      <div>
-        <label
-          htmlFor="saturation"
-          className="block text-sm font-medium text-gray-700"
-        >
-          Saturation
-        </label>
-        <input
-          type="range"
-          id="saturation"
-          min="0"
-          max="200"
-          value={saturation}
-          onChange={(e) => setSaturation(Number(e.target.value))}
-          className="w-full"
-        />
-      </div>
-      <div>
-        <label
-          htmlFor="rotation"
-          className="block text-sm font-medium text-gray-700"
-        >
-          Rotation
-        </label>
-        <input
-          type="range"
-          id="rotation"
-          min="0"
-          max="360"
-          value={rotation}
-          onChange={(e) => setRotation(Number(e.target.value))}
-          className="w-full"
-        />
-      </div>
-    </div>
-  );
+    <Card className="w-full">
+      <CardHeader>
+        <CardTitle>Image Controls</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        <div className="space-y-2">
+          <Label htmlFor="brightness">Brightness</Label>
+          <Slider
+            id="brightness"
+            min={0}
+            max={200}
+            step={1}
+            value={[brightness]}
+            onValueChange={(value) => setBrightness(value[0])}
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="contrast">Contrast</Label>
+          <Slider
+            id="contrast"
+            min={0}
+            max={200}
+            step={1}
+            value={[contrast]}
+            onValueChange={(value) => setContrast(value[0])}
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="saturation">Saturation</Label>
+          <Slider
+            id="saturation"
+            min={0}
+            max={200}
+            step={1}
+            value={[saturation]}
+            onValueChange={(value) => setSaturation(value[0])}
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="rotation">Rotation</Label>
+          <Slider
+            id="rotation"
+            min={0}
+            max={360}
+            step={1}
+            value={[rotation]}
+            onValueChange={(value) => setRotation(value[0])}
+          />
+        </div>
+      </CardContent>
+    </Card>
+  )
 }

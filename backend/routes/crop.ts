@@ -5,20 +5,47 @@ import fs from 'fs';
 
 const router = express.Router();
 
+// Paths for original and preview images
+const uploadsDir = path.resolve(process.cwd(), 'uploads');
+const originalImagePath = path.join(uploadsDir, 'original.jpeg'); // Ensure this is set correctly
+const previewImagePath = path.join(uploadsDir, 'preview.jpeg');
+
+// Ensure the uploads directory exists
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir);
+}
+
+// Helper function to save cropped images
+const saveCroppedImage = async (
+  imageBuffer: Buffer,
+  cropData: { x: number; y: number; width: number; height: number },
+  outputPath: string
+) => {
+  return sharp(imageBuffer)
+    .extract({
+      left: Math.round(cropData.x),
+      top: Math.round(cropData.y),
+      width: Math.round(cropData.width),
+      height: Math.round(cropData.height),
+    })
+    .toFile(outputPath);
+};
+
 // POST /api/crop - Crop the image
 router.post('/', async (req, res) => {
-  const { width, height, left, top } = req.body;
+  const { x, y, width, height } = req.body;
 
   try {
-    const imageBuffer = fs.readFileSync(path.join(__dirname, '../uploads', 'image.jpeg'));
-    const image = sharp(imageBuffer).extract({ width, height, left, top });
+    // Load the original image
+    const imageBuffer = fs.readFileSync(originalImagePath);
 
-    const previewBuffer = await image.resize(800).jpeg({ quality: 60 }).toBuffer();
-    const previewPath = path.join(__dirname, '../uploads', `${Date.now()}.jpeg`);
-    fs.writeFileSync(previewPath, previewBuffer);
+    // Crop the image using the pixel dimensions provided
+    await saveCroppedImage(imageBuffer, { x, y, width, height }, previewImagePath);
 
-    res.json({ previewUrl: `${path.basename(previewPath)}` });
+    // Return the new preview URL
+    res.json({ previewUrl: `preview.jpeg?t=${Date.now()}` });
   } catch (error) {
+    console.error('Error cropping image:', error);
     res.status(500).json({ message: 'Error cropping image' });
   }
 });
