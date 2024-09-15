@@ -1,6 +1,6 @@
 # FilterPixel Hiring Challenge 🖼️✨
 
-![Project Screenshot](https://github.com/user-attachments/assets/87c1ca58-4f6a-4da3-ad68-c4c555fca37b)
+https://github.com/user-attachments/assets/87c1ca58-4f6a-4da3-ad68-c4c555fca37b
 
 ---
 
