@@ -1,5 +1,11 @@
 # FilterPixel Hiring Challenge
 
+
+https://github.com/user-attachments/assets/87c1ca58-4f6a-4da3-ad68-c4c555fca37b
+
+
+
+
 ## Table of Contents
 1. [Objective](#objective)
 2. [Demo](#demo)
@@ -30,9 +36,6 @@
 
 ## Objective
 Build a full-stack image processing web application that accepts image uploads, processes them on the backend, and provides real-time previews of the manipulated image. Users can download the final processed image in their desired format (PNG or JPEG).
-
-## Demo
-
 
 ## Local Setup Instructions
 
