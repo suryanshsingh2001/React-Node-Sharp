@@ -18,7 +18,7 @@ let previewImagePath = "";
 const savePreviewImage = async (buffer : Buffer, filePath : any) => {
   return sharp(buffer)
     .resize(800) // Low-quality, resized preview
-    .jpeg({ quality: 60 }) // Lower quality for speed
+    .jpeg({ quality: 80 }) // Lower quality for speed
     .toFile(filePath);
 };
 

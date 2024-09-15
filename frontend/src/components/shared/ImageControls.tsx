@@ -51,7 +51,7 @@ export default function ImageControls() {
     } catch (error) {
       console.error(`Error updating ${endpoint}:`, error)
     }
-  }, 400)
+  }, 300)
 
   useEffect(() => {
     const { brightness, contrast, saturation, rotation } = debouncedValues

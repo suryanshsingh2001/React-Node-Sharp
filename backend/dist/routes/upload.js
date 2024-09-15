@@ -27,7 +27,7 @@ let previewImagePath = "";
 const savePreviewImage = (buffer, filePath) => __awaiter(void 0, void 0, void 0, function* () {
     return (0, sharp_1.default)(buffer)
         .resize(800) // Low-quality, resized preview
-        .jpeg({ quality: 60 }) // Lower quality for speed
+        .jpeg({ quality: 80 }) // Lower quality for speed
         .toFile(filePath);
 });
 // POST /api/upload - Handle image uploads and dynamically detect format

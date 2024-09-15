@@ -12,6 +12,7 @@ const rotation_1 = __importDefault(require("./routes/rotation"));
 const crop_1 = __importDefault(require("./routes/crop"));
 const saturation_1 = __importDefault(require("./routes/saturation"));
 const download_1 = __importDefault(require("./routes/download"));
+const reset_1 = __importDefault(require("./routes/reset"));
 const path_1 = __importDefault(require("path"));
 const app = (0, express_1.default)();
 // Middleware
@@ -22,13 +23,13 @@ app.use('/uploads', express_1.default.static(path_1.default.join(__dirname, "../
 app.use('/exports', express_1.default.static(path_1.default.join(__dirname, "../", "exports")));
 // Use the image manipulation routes
 app.use('/api/upload', upload_1.default);
-app.use('/api/brightness', brightness_1.default); //✅
-app.use('/api/contrast', contrast_1.default); //✅
-app.use("/api/saturation", saturation_1.default); //✅
+app.use('/api/brightness', brightness_1.default);
+app.use('/api/contrast', contrast_1.default);
+app.use("/api/saturation", saturation_1.default);
 app.use('/api/rotation', rotation_1.default);
 app.use('/api/crop', crop_1.default);
 app.use('/api/download', download_1.default);
-app.use('/api/reset', download_1.default);
+app.use('/api/reset', reset_1.default);
 const PORT = 5000;
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);

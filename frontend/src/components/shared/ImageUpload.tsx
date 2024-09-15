@@ -1,10 +1,8 @@
-'use client'
 
 import React, { useState } from "react"
 import { useImageContext } from "../context/ImageContext"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Loader2, AlertCircle } from "lucide-react"
 
