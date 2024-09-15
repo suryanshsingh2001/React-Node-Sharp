@@ -5,14 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const cors_1 = __importDefault(require("cors"));
-const upload_1 = __importDefault(require("./routes/upload"));
-const brightness_1 = __importDefault(require("./routes/brightness"));
-const contrast_1 = __importDefault(require("./routes/contrast"));
-const rotation_1 = __importDefault(require("./routes/rotation"));
-const crop_1 = __importDefault(require("./routes/crop"));
-const saturation_1 = __importDefault(require("./routes/saturation"));
-const download_1 = __importDefault(require("./routes/download"));
-const reset_1 = __importDefault(require("./routes/reset"));
+const routes_1 = require("./routes");
 const path_1 = __importDefault(require("path"));
 const app = (0, express_1.default)();
 // Middleware
@@ -22,14 +15,14 @@ app.use((0, cors_1.default)());
 app.use('/uploads', express_1.default.static(path_1.default.join(__dirname, "../", "uploads")));
 app.use('/exports', express_1.default.static(path_1.default.join(__dirname, "../", "exports")));
 // Use the image manipulation routes
-app.use('/api/upload', upload_1.default);
-app.use('/api/brightness', brightness_1.default);
-app.use('/api/contrast', contrast_1.default);
-app.use("/api/saturation", saturation_1.default);
-app.use('/api/rotation', rotation_1.default);
-app.use('/api/crop', crop_1.default);
-app.use('/api/download', download_1.default);
-app.use('/api/reset', reset_1.default);
+app.use('/api/upload', routes_1.uploadRoutes);
+app.use('/api/brightness', routes_1.brightnessRoutes);
+app.use('/api/contrast', routes_1.contrastRoutes);
+app.use("/api/saturation", routes_1.saturationRoutes);
+app.use('/api/rotation', routes_1.rotationRoutes);
+app.use('/api/crop', routes_1.cropRoutes);
+app.use('/api/download', routes_1.downloadRoutes);
+app.use('/api/reset', routes_1.resetRoutes);
 const PORT = 5000;
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);

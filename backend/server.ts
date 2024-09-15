@@ -1,13 +1,18 @@
 import express from 'express';
 import cors from 'cors';
-import uploadRoutes from './routes/upload';
-import brightnessRoutes from './routes/brightness';
-import contrastRoutes from './routes/contrast';
-import rotationRoutes from './routes/rotation';
-import cropRoutes from './routes/crop';
-import saturationRoutes from './routes/saturation';
-import downloadRoutes from './routes/download';
-import resetRoutes from './routes/reset';
+
+import {
+  uploadRoutes,
+  brightnessRoutes,
+  contrastRoutes,
+  saturationRoutes,
+  rotationRoutes,
+  cropRoutes,
+  downloadRoutes,
+  resetRoutes
+} from './routes';
+
+
 import path from 'path';
 
 const app = express();
