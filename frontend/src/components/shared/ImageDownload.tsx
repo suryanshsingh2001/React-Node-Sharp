@@ -43,7 +43,7 @@ export default function ImageDownload() {
       console.log("Downloading image from:", exportUrl);
       FileSaver.saveAs(exportUrl, `processed.${format}`);
 
-      clearAll();
+      // clearAll();
 
       console.log("Image downloaded successfully");
 

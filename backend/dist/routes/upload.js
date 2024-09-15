@@ -21,8 +21,8 @@ const router = express_1.default.Router();
 const storage = multer_1.default.memoryStorage();
 const upload = (0, multer_1.default)({ storage });
 // Dynamic file paths (without hardcoding the extension)
-let originalImagePath = "";
-let previewImagePath = "";
+const originalImagePath = path_1.default.resolve(process.cwd(), "uploads", `original.jpeg`);
+const previewImagePath = path_1.default.resolve(process.cwd(), "uploads", `preview.jpeg`);
 // Helper function to save the preview image
 const savePreviewImage = (buffer, filePath) => __awaiter(void 0, void 0, void 0, function* () {
     return (0, sharp_1.default)(buffer)
@@ -42,14 +42,14 @@ router.post("/", upload.single("image"), (req, res) => __awaiter(void 0, void 0,
         // console.log("Detected image format:", metadata.format);
         // Set image paths with appropriate extension based on detected format
         // const extension = metadata.format;
-        originalImagePath = path_1.default.resolve(process.cwd(), "uploads", `original.jpeg`);
-        previewImagePath = path_1.default.resolve(process.cwd(), "uploads", `preview.jpeg`);
         // Save the original image
         yield image.toFile(originalImagePath);
         // Save the preview image
         yield savePreviewImage(req.file.buffer, previewImagePath);
         const previewUrl = `${path_1.default.basename(previewImagePath)}?t=${Date.now()}`;
-        res.status(200).json({ previewUrl, message: "Image uploaded successfully" });
+        res
+            .status(200)
+            .json({ previewUrl, message: "Image uploaded successfully" });
     }
     catch (error) {
         console.error("Error processing image:", error);

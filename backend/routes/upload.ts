@@ -11,11 +11,15 @@ const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
 // Dynamic file paths (without hardcoding the extension)
-let originalImagePath = "";
-let previewImagePath = "";
+const originalImagePath = path.resolve(
+  process.cwd(),
+  "uploads",
+  `original.jpeg`
+);
+const previewImagePath = path.resolve(process.cwd(), "uploads", `preview.jpeg`);
 
 // Helper function to save the preview image
-const savePreviewImage = async (buffer : Buffer, filePath : any) => {
+const savePreviewImage = async (buffer: Buffer, filePath: any) => {
   return sharp(buffer)
     .resize(800) // Low-quality, resized preview
     .jpeg({ quality: 80 }) // Lower quality for speed
@@ -37,8 +41,6 @@ router.post("/", upload.single("image"), async (req, res) => {
 
     // Set image paths with appropriate extension based on detected format
     // const extension = metadata.format;
-    originalImagePath = path.resolve(process.cwd(), "uploads", `original.jpeg`);
-    previewImagePath = path.resolve(process.cwd(), "uploads", `preview.jpeg`);
 
     // Save the original image
     await image.toFile(originalImagePath);
@@ -47,7 +49,9 @@ router.post("/", upload.single("image"), async (req, res) => {
     await savePreviewImage(req.file.buffer, previewImagePath);
 
     const previewUrl = `${path.basename(previewImagePath)}?t=${Date.now()}`;
-    res.status(200).json({ previewUrl, message: "Image uploaded successfully" });
+    res
+      .status(200)
+      .json({ previewUrl, message: "Image uploaded successfully" });
   } catch (error) {
     console.error("Error processing image:", error);
     res.status(500).json({ message: "Error processing image" });

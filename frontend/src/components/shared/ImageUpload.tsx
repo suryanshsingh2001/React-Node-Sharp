@@ -9,7 +9,7 @@ import { Loader2, AlertCircle, Upload, X } from "lucide-react"
 
 
 export default function ImageUpload() {
-  const { setImage, setPreview, image, clearAll } = useImageContext()
+  const { setImage, setPreview, image,clearAll } = useImageContext()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [fileName, setFileName] = useState<string | null>(null)
@@ -28,6 +28,8 @@ export default function ImageUpload() {
   }, [image])
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+
+    clearAll()
     const file = e.target.files?.[0]
 
     if (file) {
@@ -76,7 +78,6 @@ export default function ImageUpload() {
     setFileName(null)
 
 
-    clearAll()
     setError(null)
     if (fileInputRef.current) {
       fileInputRef.current.value = ''

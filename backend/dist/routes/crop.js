@@ -16,36 +16,63 @@ const express_1 = __importDefault(require("express"));
 const sharp_1 = __importDefault(require("sharp"));
 const path_1 = __importDefault(require("path"));
 const fs_1 = __importDefault(require("fs"));
-const router = express_1.default.Router();
-// Paths for original and preview images
-const uploadsDir = path_1.default.resolve(process.cwd(), 'uploads');
-const originalImagePath = path_1.default.join(uploadsDir, 'original.jpeg'); // Ensure this is set correctly
-const previewImagePath = path_1.default.join(uploadsDir, 'preview.jpeg');
-// Ensure the uploads directory exists
-if (!fs_1.default.existsSync(uploadsDir)) {
-    fs_1.default.mkdirSync(uploadsDir);
+const uploadDir = path_1.default.resolve(process.cwd(), 'uploads');
+const originalImagePath = path_1.default.join(uploadDir, 'original.jpeg');
+const croppedImagePath = path_1.default.join(uploadDir, 'cropped.jpeg');
+const previewImagePath = path_1.default.join(uploadDir, 'preview.jpeg');
+if (!fs_1.default.existsSync(uploadDir)) {
+    fs_1.default.mkdirSync(uploadDir);
 }
-// Helper function to save cropped images
-const saveCroppedImage = (imageBuffer, cropData, outputPath) => __awaiter(void 0, void 0, void 0, function* () {
+const router = express_1.default.Router();
+const savePreviewImage = (imageBuffer, filePath) => __awaiter(void 0, void 0, void 0, function* () {
     return (0, sharp_1.default)(imageBuffer)
-        .extract({
-        left: Math.round(cropData.x),
-        top: Math.round(cropData.y),
-        width: Math.round(cropData.width),
-        height: Math.round(cropData.height),
-    })
-        .toFile(outputPath);
+        .resize(800)
+        .jpeg({ quality: 80 })
+        .toFile(filePath);
 });
-// POST /api/crop - Crop the image
 router.post('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { x, y, width, height } = req.body;
+    const { croppedArea } = req.body;
+    if (!croppedArea) {
+        return res.status(400).json({ message: 'Cropped area data is missing' });
+    }
     try {
-        // Load the original image
-        const imageBuffer = fs_1.default.readFileSync(originalImagePath);
-        // Crop the image using the pixel dimensions provided
-        yield saveCroppedImage(imageBuffer, { x, y, width, height }, previewImagePath);
-        // Return the new preview URL
-        res.json({ previewUrl: `preview.jpeg?t=${Date.now()}` });
+        const { x, y, width, height } = croppedArea;
+        console.log(`Cropping image to: x=${x}, y=${y}, width=${width}, height=${height}`);
+        // Check if the original image exists
+        if (!fs_1.default.existsSync(originalImagePath)) {
+            return res.status(404).json({ message: 'Original image not found' });
+        }
+        // Read the original image dimensions
+        const originalImage = (0, sharp_1.default)(originalImagePath);
+        const metadata = yield originalImage.metadata();
+        // Clamp the crop area to fit within the image boundaries
+        if (metadata.width === undefined || metadata.height === undefined) {
+            return res.status(500).json({ message: 'Error reading image metadata' });
+        }
+        const cropX = Math.max(0, Math.min(x, metadata.width - width));
+        const cropY = Math.max(0, Math.min(y, metadata.height - height));
+        const cropWidth = Math.min(width, metadata.width - cropX);
+        const cropHeight = Math.min(height, metadata.height - cropY);
+        // Ensure width and height are positive
+        if (cropWidth <= 0 || cropHeight <= 0) {
+            return res.status(400).json({ message: 'Invalid crop dimensions' });
+        }
+        // Crop the image
+        const croppedImage = originalImage.extract({
+            left: Math.round(cropX),
+            top: Math.round(cropY),
+            width: Math.round(cropWidth),
+            height: Math.round(cropHeight),
+        });
+        // Save the cropped image
+        yield croppedImage.toFile(croppedImagePath);
+        // Generate a preview image
+        const croppedBuffer = yield croppedImage.toBuffer();
+        yield savePreviewImage(croppedBuffer, previewImagePath);
+        // Send back the preview URL with a timestamp
+        res.json({
+            previewUrl: `preview.jpeg?t=${Date.now()}`,
+        });
     }
     catch (error) {
         console.error('Error cropping image:', error);
