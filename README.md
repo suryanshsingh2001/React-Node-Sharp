@@ -46,7 +46,7 @@ Build a full-stack image processing web application that accepts image uploads, 
     npm i
     ```
 3. Set up the environment variables:
-    - Copy the contents from `.envexample` to `.env`.
+    - Copy the contents from `.envexample` to `.env`. You can find the file [here](https://github.com/suryanshsingh2001/FilterPixel-Task/blob/main/frontend/.envExample)
 4. Start the frontend development server: 
     ```bash
     npm run dev
