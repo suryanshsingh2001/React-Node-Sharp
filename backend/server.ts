@@ -26,7 +26,7 @@ app.use('/exports', express.static(path.join(__dirname, "../", "exports")));
 app.use('/api/upload', uploadRoutes); 
 app.use('/api/brightness', brightnessRoutes); 
 app.use('/api/contrast', contrastRoutes); 
-app.use("/api/saturation", saturationRoutes) 
+app.use("/api/saturation", saturationRoutes)
 app.use('/api/rotation', rotationRoutes);
 app.use('/api/crop', cropRoutes);
 app.use('/api/download', downloadRoutes);

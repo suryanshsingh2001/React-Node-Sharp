@@ -32,20 +32,23 @@ const savePreviewImage = (imageBuffer, filePath) => __awaiter(void 0, void 0, vo
         .jpeg({ quality: 80 }) // Lower quality for preview
         .toFile(filePath);
 });
-// POST /api/brightness - Adjust image brightness
+// POST /api/adjustments - Adjust image brightness, saturation, and contrast
 router.post("/", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { brightness } = req.body;
-    console.log(`Adjusting brightness to: ${brightness}`);
+    const { brightness = 100, saturation = 100, contrast = 100 } = req.body;
+    console.log(`Adjusting: brightness=${brightness}, saturation=${saturation}, contrast=${contrast}`);
     try {
         // Load the original image
         const imageBuffer = fs_1.default.readFileSync(originalImagePath);
         let image = (0, sharp_1.default)(imageBuffer);
-        // Adjust brightness relative to 1.0 (100%) 
+        // Adjust brightness, saturation, and contrast relative to 1.0 (100%)
         const adjustedBrightness = brightness / 100; // 1.0 means no change
-        // Adjust brightness only if it's different from 100
-        if (brightness !== 100) {
-            image = image.modulate({ brightness: adjustedBrightness });
-        }
+        const adjustedSaturation = saturation / 100; // 1.0 means no change
+        const adjustedContrast = contrast / 100; // 1.0 means no change
+        // Apply adjustments only if they differ from 100
+        image = image.modulate({
+            brightness: adjustedBrightness,
+            saturation: adjustedSaturation,
+        }).linear(adjustedContrast, -(128 * (adjustedContrast - 1)));
         // Generate and save the preview image from the original buffer, not the overwritten image
         const previewBuffer = yield image.toBuffer();
         yield savePreviewImage(previewBuffer, previewImagePath);

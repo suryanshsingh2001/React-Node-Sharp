@@ -45,8 +45,10 @@ export default function ImageUpload() {
         const data = await response.json()
 
         const clientImage = `${storageUrl}/${data.previewUrl}`
-        console.log(clientImage)
         setPreview(clientImage)
+
+
+        //I want to clear form data after uploading image
       } catch (error) {
         console.error("Error uploading image:", error)
         setError("Failed to upload image. Please try again.")

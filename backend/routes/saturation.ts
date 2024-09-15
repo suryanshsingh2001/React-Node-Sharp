@@ -12,31 +12,37 @@ const previewImagePath = path.resolve(process.cwd(), "uploads", "preview.jpeg");
 const savePreviewImage = async (imageBuffer: Buffer, filePath: string) => {
   return sharp(imageBuffer)
     .resize(800) // Low-res for preview
-    .jpeg({ quality: 60 }) // Lower quality for speed
+    .jpeg({ quality: 80 }) // Lower quality for speed
     .toFile(filePath);
 };
 
 // POST /api/saturation - Adjust image saturation and return a preview
 router.post("/", async (req, res) => {
-  const { saturation } = req.body;
+  const { saturation = 100, brightness = 100, contrast = 100 } = req.body;
+
+  console.log(`Adjusting saturation to: ${saturation}`);
 
   try {
-    // Read the original image
+    // Load the original image
     const imageBuffer = fs.readFileSync(originalImagePath);
     let image = sharp(imageBuffer);
 
-    // Adjust saturation using modulate
-    image = image.modulate({
-      saturation: saturation / 100, // Normalize to range [0.0, 2.0], where 1 is default
-    });
+    // Apply saturation adjustment
+    const adjustedSaturation = saturation / 100;
 
-    // Save the updated original image
-    await image.toFile(originalImagePath);
+    image = image.modulate({
+      brightness: brightness / 100, // Keep brightness unchanged
+      saturation: adjustedSaturation, // Adjust saturation
+    }).linear(
+      contrast / 100, // Keep contrast unchanged
+      -(128 * (contrast / 100 - 1)) // Maintain mid-tones
+    );
 
     // Generate and save the preview image
-    await savePreviewImage(imageBuffer, previewImagePath);
+    const previewBuffer = await image.toBuffer();
+    await savePreviewImage(previewBuffer, previewImagePath);
 
-    // Respond with preview URL and cache-busting
+    // Respond with preview URL
     res.json({
       previewUrl: `${path.basename(previewImagePath)}?t=${Date.now()}`,
     });

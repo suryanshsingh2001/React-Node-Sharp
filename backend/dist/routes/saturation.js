@@ -23,25 +23,29 @@ const previewImagePath = path_1.default.resolve(process.cwd(), "uploads", "previ
 const savePreviewImage = (imageBuffer, filePath) => __awaiter(void 0, void 0, void 0, function* () {
     return (0, sharp_1.default)(imageBuffer)
         .resize(800) // Low-res for preview
-        .jpeg({ quality: 60 }) // Lower quality for speed
+        .jpeg({ quality: 80 }) // Lower quality for speed
         .toFile(filePath);
 });
 // POST /api/saturation - Adjust image saturation and return a preview
 router.post("/", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { saturation } = req.body;
+    const { saturation = 100, brightness = 100, contrast = 100 } = req.body;
+    console.log(`Adjusting saturation to: ${saturation}`);
     try {
-        // Read the original image
+        // Load the original image
         const imageBuffer = fs_1.default.readFileSync(originalImagePath);
         let image = (0, sharp_1.default)(imageBuffer);
-        // Adjust saturation using modulate
+        // Apply saturation adjustment
+        const adjustedSaturation = saturation / 100;
         image = image.modulate({
-            saturation: saturation / 100, // Normalize to range [0.0, 2.0], where 1 is default
-        });
-        // Save the updated original image
-        yield image.toFile(originalImagePath);
+            brightness: brightness / 100, // Keep brightness unchanged
+            saturation: adjustedSaturation, // Adjust saturation
+        }).linear(contrast / 100, // Keep contrast unchanged
+        -(128 * (contrast / 100 - 1)) // Maintain mid-tones
+        );
         // Generate and save the preview image
-        yield savePreviewImage(imageBuffer, previewImagePath);
-        // Respond with preview URL and cache-busting
+        const previewBuffer = yield image.toBuffer();
+        yield savePreviewImage(previewBuffer, previewImagePath);
+        // Respond with preview URL
         res.json({
             previewUrl: `${path_1.default.basename(previewImagePath)}?t=${Date.now()}`,
         });

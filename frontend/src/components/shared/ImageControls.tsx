@@ -37,19 +37,43 @@ export default function ImageControls() {
     rotation,
   })
 
-  const updateImage = debounce(async (endpoint: string, value: number) => {
+  const updateImage = debounce(async (type: string, value: number) => {
+
+
+    console.log(`Updating ${type} to: ${value}`)
+    const { brightness, contrast, saturation, rotation } = debouncedValues
+    let requestBody: any = {}
+
+    // Prepare the request body with the correct key-value based on the type
+    switch (type) {
+      case "brightness":
+        requestBody = { brightness: value, contrast, saturation, rotation }
+        break
+      case "contrast":
+        requestBody = { brightness, contrast: value, saturation, rotation }
+        break
+      case "saturation":
+        requestBody = { brightness, contrast, saturation: value, rotation }
+        break
+      case "rotation":
+        requestBody = { brightness, contrast, saturation, rotation: value }
+        break
+      default:
+        break
+    }
+
     try {
-      const response = await fetch(`${apiBaseUrl}/${endpoint}`, {
+      const response = await fetch(`${apiBaseUrl}/${type}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ [endpoint]: value }),
+        body: JSON.stringify(requestBody),
       })
       const data = await response.json()
       setPreview(`${storageUrl}/${data.previewUrl}`)
     } catch (error) {
-      console.error(`Error updating ${endpoint}:`, error)
+      console.error(`Error updating ${type}:`, error)
     }
   }, 300)
 

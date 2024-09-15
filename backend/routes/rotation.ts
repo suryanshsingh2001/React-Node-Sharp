@@ -7,43 +7,57 @@ const router = express.Router();
 const originalImagePath = path.resolve(
   process.cwd(),
   "uploads",
-  `original.jpeg`
+  "original.jpeg"
 );
-const previewImagePath = path.resolve(process.cwd(), "uploads", `preview.jpeg`);
+const previewImagePath = path.resolve(process.cwd(), "uploads", "preview.jpeg");
 
-// Helper function to save preview image
+// Helper function to save the preview image
 const savePreviewImage = async (imageBuffer: Buffer, filePath: string) => {
   return sharp(imageBuffer)
     .resize(800) // Low-res for preview
-    .jpeg({ quality: 60 }) // Lower quality for speed
+    .jpeg({ quality: 80 }) // Lower quality for speed
     .toFile(filePath);
 };
 
-// POST /api/rotate - Rotate the image and return a preview
+// POST /api/rotate - Rotate the image, apply brightness, contrast, and saturation, and return a preview
 router.post("/", async (req, res) => {
-  const { rotation } = req.body;
+  const {
+    rotation,
+    brightness = 100,
+    contrast = 100,
+    saturation = 100,
+  } = req.body;
 
   try {
     // Read the original high-quality image
     const imageBuffer = fs.readFileSync(originalImagePath);
+    let image = sharp(imageBuffer);
 
-    // Apply rotation to the original image
-    let image = sharp(imageBuffer).rotate(rotation, { background: { r: 255, g: 255, b: 255, alpha: 0 } });
+    // Apply brightness, contrast, and saturation adjustments using `modulate`
+    const adjustedBrightness = brightness / 100; // 1.0 means no change
+    const adjustedSaturation = saturation / 100; // 1.0 means no change
+    const adjustedContrast = contrast / 100; // 1.0 means no change
 
-    // Save the updated original image (if required, you can omit this if you don't want to overwrite)
-    await image.toFile(originalImagePath);
+    // Apply adjustments only if they differ from 100
+    image = image
+      .modulate({
+        brightness: adjustedBrightness,
+        saturation: adjustedSaturation,
+      })
+      .linear(adjustedContrast, -(128 * (adjustedContrast - 1)))
+      .rotate(rotation, { background: { r: 255, g: 255, b: 255, alpha: 1 } });
 
-    // Generate and save the preview image
-    const rotatedBuffer = await image.toBuffer(); // Get the rotated image buffer
-    await savePreviewImage(rotatedBuffer, previewImagePath); // Create a preview version from the rotated image
+    // Generate a preview of the adjusted and rotated image
+    const rotatedBuffer = await image.toBuffer();
+    await savePreviewImage(rotatedBuffer, previewImagePath); // Create a preview version
 
-    // Respond with the preview URL and cache-busting
+    // Send the preview URL with a cache-busting timestamp
     res.json({
       previewUrl: `${path.basename(previewImagePath)}?t=${Date.now()}`,
     });
   } catch (error) {
-    console.error("Error rotating image:", error);
-    res.status(500).json({ message: "Error rotating image" });
+    console.error("Error processing image:", error);
+    res.status(500).json({ message: "Error processing image" });
   }
 });
 
