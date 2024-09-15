@@ -57,7 +57,9 @@ export default function ImageDownload() {
   return (
     <Card className="w-full">
       <CardHeader>
-        <CardTitle>Download Image</CardTitle>
+        <CardTitle  
+          className="text-lg font-semibold"
+        >Export Image</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <Select
