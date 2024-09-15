@@ -1,14 +1,13 @@
-import express from 'express';
-import sharp from 'sharp';
-import path from 'path';
-import fs from 'fs';
+import express from "express";
+import sharp from "sharp";
+import path from "path";
+import fs from "fs";
 import { savePreviewImage } from "../lib/utils";
 
-
-const uploadDir = path.resolve(process.cwd(), 'uploads');
-const originalImagePath = path.join(uploadDir, 'original.jpeg');
-const croppedImagePath = path.join(uploadDir, 'cropped.jpeg');
-const previewImagePath = path.join(uploadDir, 'preview.jpeg');
+const uploadDir = path.resolve(process.cwd(), "uploads");
+const originalImagePath = path.join(uploadDir, "original.jpeg");
+const croppedImagePath = path.join(uploadDir, "cropped.jpeg");
+const previewImagePath = path.join(uploadDir, "preview.jpeg");
 
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir);
@@ -16,28 +15,26 @@ if (!fs.existsSync(uploadDir)) {
 
 const router = express.Router();
 
-
-
-router.post('/', async (req, res) => {
-  const { croppedAreaPixels, zoom=1, naturalWidth, naturalHeight } = req.body;
+router.post("/", async (req, res) => {
+  const { croppedAreaPixels, zoom = 1, naturalWidth, naturalHeight } = req.body;
 
   if (!croppedAreaPixels || !naturalWidth || !naturalHeight) {
-    return res.status(400).json({ message: 'Required crop data is missing' });
+    return res.status(400).json({ message: "Required crop data is missing" });
   }
 
   try {
     const { x, y, width, height } = croppedAreaPixels;
 
     if (!fs.existsSync(originalImagePath)) {
-      return res.status(404).json({ message: 'Original image not found' });
+      return res.status(404).json({ message: "Original image not found" });
     }
 
     const imageBuffer = fs.readFileSync(originalImagePath);
     const image = sharp(imageBuffer);
     const metadata = await image.metadata();
 
-    if(metadata.width === undefined || metadata.height === undefined) {
-      return res.status(500).json({ message: 'Error reading image metadata' });
+    if (metadata.width === undefined || metadata.height === undefined) {
+      return res.status(500).json({ message: "Error reading image metadata" });
     }
 
     // Calculate the scale factor between the natural image size and the actual image size
@@ -51,13 +48,19 @@ router.post('/', async (req, res) => {
     const actualY = (y / zoom) * scaleY;
 
     // Ensure the crop area is within the image boundaries
-    const cropX = Math.max(0, Math.min(actualX, metadata.width - actualCropWidth));
-    const cropY = Math.max(0, Math.min(actualY, metadata.height - actualCropHeight));
+    const cropX = Math.max(
+      0,
+      Math.min(actualX, metadata.width - actualCropWidth)
+    );
+    const cropY = Math.max(
+      0,
+      Math.min(actualY, metadata.height - actualCropHeight)
+    );
     const cropWidth = Math.min(actualCropWidth, metadata.width - cropX);
     const cropHeight = Math.min(actualCropHeight, metadata.height - cropY);
 
     if (cropWidth <= 0 || cropHeight <= 0) {
-      return res.status(400).json({ message: 'Invalid crop dimensions' });
+      return res.status(400).json({ message: "Invalid crop dimensions" });
     }
 
     // Crop the image
@@ -82,8 +85,8 @@ router.post('/', async (req, res) => {
       previewUrl: `preview.jpeg?t=${Date.now()}`,
     });
   } catch (error) {
-    console.error('Error cropping image:', error);
-    res.status(500).json({ message: 'Error cropping image' });
+    console.error("Error cropping image:", error);
+    res.status(500).json({ message: "Error cropping image" });
   }
 });
 

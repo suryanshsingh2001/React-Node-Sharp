@@ -17,15 +17,19 @@ import path from 'path';
 
 const app = express();
 
-// Middleware
+
+
+// Enable CORS and JSON parsing
 app.use(express.json());
 app.use(cors());
 
-// Serve static files
 
 
+
+// Serve the uploads and export folder statically
 app.use('/uploads', express.static(path.join(__dirname, "../", "uploads")));
 app.use('/exports', express.static(path.join(__dirname, "../", "exports")));
+
 
 // Use the image manipulation routes
 app.use('/api/upload', uploadRoutes); 

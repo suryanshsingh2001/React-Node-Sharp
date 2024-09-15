@@ -12,8 +12,6 @@ const originalImagePath = path.resolve(
 );
 const previewImagePath = path.resolve(process.cwd(), "uploads", "preview.jpeg");
 
-
-
 // POST /api/rotate - Rotate the image, apply brightness, contrast, and saturation, and return a preview
 router.post("/", async (req, res) => {
   const {

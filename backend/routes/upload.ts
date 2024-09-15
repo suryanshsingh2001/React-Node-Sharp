@@ -11,7 +11,6 @@ const router = express.Router();
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
-
 // Dynamic file paths (without hardcoding the extension)
 const originalImagePath = path.resolve(
   process.cwd(),
@@ -19,8 +18,6 @@ const originalImagePath = path.resolve(
   `original.jpeg`
 );
 const previewImagePath = path.resolve(process.cwd(), "uploads", `preview.jpeg`);
-
-
 
 // POST /api/upload - Handle image uploads and dynamically detect format
 router.post("/", upload.single("image"), async (req, res) => {
@@ -31,7 +28,7 @@ router.post("/", upload.single("image"), async (req, res) => {
   try {
     // Use sharp to detect the format of the uploaded image
     const image = sharp(req.file.buffer);
-   
+
     // Save the original image
     await image.toFile(originalImagePath);
 

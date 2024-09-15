@@ -6,10 +6,12 @@ import { savePreviewImage } from "../lib/utils";
 
 const router = express.Router();
 
-const originalImagePath = path.resolve(process.cwd(), "uploads", "original.jpeg");
+const originalImagePath = path.resolve(
+  process.cwd(),
+  "uploads",
+  "original.jpeg"
+);
 const previewImagePath = path.resolve(process.cwd(), "uploads", "preview.jpeg");
-
-
 
 // POST /api/saturation - Adjust image saturation and return a preview
 router.post("/", async (req, res) => {
@@ -25,13 +27,15 @@ router.post("/", async (req, res) => {
     // Apply saturation adjustment
     const adjustedSaturation = saturation / 100;
 
-    image = image.modulate({
-      brightness: brightness / 100, // Keep brightness unchanged
-      saturation: adjustedSaturation, // Adjust saturation
-    }).linear(
-      contrast / 100, // Keep contrast unchanged
-      -(128 * (contrast / 100 - 1)) // Maintain mid-tones
-    );
+    image = image
+      .modulate({
+        brightness: brightness / 100, // Keep brightness unchanged
+        saturation: adjustedSaturation, // Adjust saturation
+      })
+      .linear(
+        contrast / 100, // Keep contrast unchanged
+        -(128 * (contrast / 100 - 1)) // Maintain mid-tones
+      );
 
     // Generate and save the preview image
     const previewBuffer = await image.toBuffer();

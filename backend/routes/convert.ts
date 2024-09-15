@@ -5,7 +5,6 @@ import fs from "fs";
 
 const router = express.Router();
 
-
 // POST /api/convert - Convert image format (e.g., PNG to JPEG)
 router.post("/", async (req, res) => {
   try {
