@@ -10,7 +10,7 @@ export default function Header() {
         <ModeToggle />
         <Button variant="ghost" size="icon" asChild>
           <a
-            href="https://github.com/yourusername/image-processor"
+            href="https://github.com/suryanshsingh2001/FilterPixel-Task"
             target="_blank"
             rel="noopener noreferrer"
           >
