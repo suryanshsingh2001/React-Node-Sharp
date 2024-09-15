@@ -16,6 +16,7 @@ const express_1 = __importDefault(require("express"));
 const multer_1 = __importDefault(require("multer"));
 const sharp_1 = __importDefault(require("sharp"));
 const path_1 = __importDefault(require("path"));
+const utils_1 = require("../lib/utils");
 const router = express_1.default.Router();
 // Configure multer for image uploads
 const storage = multer_1.default.memoryStorage();
@@ -23,13 +24,6 @@ const upload = (0, multer_1.default)({ storage });
 // Dynamic file paths (without hardcoding the extension)
 const originalImagePath = path_1.default.resolve(process.cwd(), "uploads", `original.jpeg`);
 const previewImagePath = path_1.default.resolve(process.cwd(), "uploads", `preview.jpeg`);
-// Helper function to save the preview image
-const savePreviewImage = (buffer, filePath) => __awaiter(void 0, void 0, void 0, function* () {
-    return (0, sharp_1.default)(buffer)
-        .resize(800) // Low-quality, resized preview
-        .jpeg({ quality: 80 }) // Lower quality for speed
-        .toFile(filePath);
-});
 // POST /api/upload - Handle image uploads and dynamically detect format
 router.post("/", upload.single("image"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     if (!req.file) {
@@ -38,14 +32,10 @@ router.post("/", upload.single("image"), (req, res) => __awaiter(void 0, void 0,
     try {
         // Use sharp to detect the format of the uploaded image
         const image = (0, sharp_1.default)(req.file.buffer);
-        // const metadata = await image.metadata();
-        // console.log("Detected image format:", metadata.format);
-        // Set image paths with appropriate extension based on detected format
-        // const extension = metadata.format;
         // Save the original image
         yield image.toFile(originalImagePath);
         // Save the preview image
-        yield savePreviewImage(req.file.buffer, previewImagePath);
+        yield (0, utils_1.savePreviewImage)(req.file.buffer, previewImagePath);
         const previewUrl = `${path_1.default.basename(previewImagePath)}?t=${Date.now()}`;
         res
             .status(200)

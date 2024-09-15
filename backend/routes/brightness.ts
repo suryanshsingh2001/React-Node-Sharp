@@ -2,6 +2,7 @@ import express from "express";
 import sharp from "sharp";
 import path from "path";
 import fs from "fs";
+import { savePreviewImage } from "../lib/utils";
 
 const router = express.Router();
 
@@ -15,13 +16,6 @@ if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir);
 }
 
-// Helper function to save preview images
-const savePreviewImage = async (imageBuffer: Buffer, filePath: string) => {
-  return sharp(imageBuffer)
-    .resize(800) // Resize for preview (low-quality)
-    .jpeg({ quality: 80 }) // Lower quality for preview
-    .toFile(filePath);
-};
 
 // POST /api/adjustments - Adjust image brightness, saturation, and contrast
 router.post("/", async (req, res) => {

@@ -16,16 +16,10 @@ const express_1 = __importDefault(require("express"));
 const sharp_1 = __importDefault(require("sharp"));
 const path_1 = __importDefault(require("path"));
 const fs_1 = __importDefault(require("fs"));
+const utils_1 = require("../lib/utils");
 const router = express_1.default.Router();
 const originalImagePath = path_1.default.resolve(process.cwd(), "uploads", "original.jpeg");
 const previewImagePath = path_1.default.resolve(process.cwd(), "uploads", "preview.jpeg");
-// Helper function to save the preview image
-const savePreviewImage = (imageBuffer, filePath) => __awaiter(void 0, void 0, void 0, function* () {
-    return (0, sharp_1.default)(imageBuffer)
-        .resize(800) // Low-res for preview
-        .jpeg({ quality: 80 }) // Lower quality for speed
-        .toFile(filePath);
-});
 // POST /api/rotate - Rotate the image, apply brightness, contrast, and saturation, and return a preview
 router.post("/", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { rotation, brightness = 100, contrast = 100, saturation = 100, } = req.body;
@@ -47,7 +41,7 @@ router.post("/", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             .rotate(rotation, { background: { r: 255, g: 255, b: 255, alpha: 1 } });
         // Generate a preview of the adjusted and rotated image
         const rotatedBuffer = yield image.toBuffer();
-        yield savePreviewImage(rotatedBuffer, previewImagePath); // Create a preview version
+        yield (0, utils_1.savePreviewImage)(rotatedBuffer, previewImagePath); // Create a preview version
         // Send the preview URL with a cache-busting timestamp
         res.json({
             previewUrl: `${path_1.default.basename(previewImagePath)}?t=${Date.now()}`,

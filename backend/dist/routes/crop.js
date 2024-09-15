@@ -16,6 +16,7 @@ const express_1 = __importDefault(require("express"));
 const sharp_1 = __importDefault(require("sharp"));
 const path_1 = __importDefault(require("path"));
 const fs_1 = __importDefault(require("fs"));
+const utils_1 = require("../lib/utils");
 const uploadDir = path_1.default.resolve(process.cwd(), 'uploads');
 const originalImagePath = path_1.default.join(uploadDir, 'original.jpeg');
 const croppedImagePath = path_1.default.join(uploadDir, 'cropped.jpeg');
@@ -24,12 +25,6 @@ if (!fs_1.default.existsSync(uploadDir)) {
     fs_1.default.mkdirSync(uploadDir);
 }
 const router = express_1.default.Router();
-const savePreviewImage = (imageBuffer, filePath) => __awaiter(void 0, void 0, void 0, function* () {
-    return (0, sharp_1.default)(imageBuffer)
-        .resize(800)
-        .jpeg({ quality: 80 })
-        .toFile(filePath);
-});
 router.post('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { croppedAreaPixels, zoom = 1, naturalWidth, naturalHeight } = req.body;
     if (!croppedAreaPixels || !naturalWidth || !naturalHeight) {
@@ -74,7 +69,7 @@ router.post('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         // Generate a preview image
         const croppedBuffer = yield croppedImage.toBuffer();
         fs_1.default.writeFileSync(originalImagePath, croppedBuffer);
-        yield savePreviewImage(croppedBuffer, previewImagePath);
+        yield (0, utils_1.savePreviewImage)(croppedBuffer, previewImagePath);
         // Send back the preview URL with a timestamp
         res.json({
             previewUrl: `preview.jpeg?t=${Date.now()}`,

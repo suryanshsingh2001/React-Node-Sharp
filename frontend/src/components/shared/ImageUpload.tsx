@@ -29,7 +29,7 @@ export default function ImageUpload() {
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
 
-    // clearAll()
+    clearAll()
     const file = e.target.files?.[0]
 
     if (file) {

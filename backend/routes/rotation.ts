@@ -2,6 +2,7 @@ import express from "express";
 import sharp from "sharp";
 import path from "path";
 import fs from "fs";
+import { savePreviewImage } from "../lib/utils";
 
 const router = express.Router();
 const originalImagePath = path.resolve(
@@ -11,13 +12,7 @@ const originalImagePath = path.resolve(
 );
 const previewImagePath = path.resolve(process.cwd(), "uploads", "preview.jpeg");
 
-// Helper function to save the preview image
-const savePreviewImage = async (imageBuffer: Buffer, filePath: string) => {
-  return sharp(imageBuffer)
-    .resize(800) // Low-res for preview
-    .jpeg({ quality: 80 }) // Lower quality for speed
-    .toFile(filePath);
-};
+
 
 // POST /api/rotate - Rotate the image, apply brightness, contrast, and saturation, and return a preview
 router.post("/", async (req, res) => {

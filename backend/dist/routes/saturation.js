@@ -16,16 +16,10 @@ const express_1 = __importDefault(require("express"));
 const sharp_1 = __importDefault(require("sharp"));
 const path_1 = __importDefault(require("path"));
 const fs_1 = __importDefault(require("fs"));
+const utils_1 = require("../lib/utils");
 const router = express_1.default.Router();
 const originalImagePath = path_1.default.resolve(process.cwd(), "uploads", "original.jpeg");
 const previewImagePath = path_1.default.resolve(process.cwd(), "uploads", "preview.jpeg");
-// Helper function to save preview image
-const savePreviewImage = (imageBuffer, filePath) => __awaiter(void 0, void 0, void 0, function* () {
-    return (0, sharp_1.default)(imageBuffer)
-        .resize(800) // Low-res for preview
-        .jpeg({ quality: 80 }) // Lower quality for speed
-        .toFile(filePath);
-});
 // POST /api/saturation - Adjust image saturation and return a preview
 router.post("/", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { saturation = 100, brightness = 100, contrast = 100 } = req.body;
@@ -44,7 +38,7 @@ router.post("/", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         );
         // Generate and save the preview image
         const previewBuffer = yield image.toBuffer();
-        yield savePreviewImage(previewBuffer, previewImagePath);
+        yield (0, utils_1.savePreviewImage)(previewBuffer, previewImagePath);
         // Respond with preview URL
         res.json({
             previewUrl: `${path_1.default.basename(previewImagePath)}?t=${Date.now()}`,

@@ -2,6 +2,8 @@ import express from 'express';
 import sharp from 'sharp';
 import path from 'path';
 import fs from 'fs';
+import { savePreviewImage } from "../lib/utils";
+
 
 const uploadDir = path.resolve(process.cwd(), 'uploads');
 const originalImagePath = path.join(uploadDir, 'original.jpeg');
@@ -14,12 +16,7 @@ if (!fs.existsSync(uploadDir)) {
 
 const router = express.Router();
 
-const savePreviewImage = async (imageBuffer: Buffer, filePath: string) => {
-  return sharp(imageBuffer)
-    .resize(800)
-    .jpeg({ quality: 80 })
-    .toFile(filePath);
-};
+
 
 router.post('/', async (req, res) => {
   const { croppedAreaPixels, zoom=1, naturalWidth, naturalHeight } = req.body;

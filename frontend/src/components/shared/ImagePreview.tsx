@@ -82,7 +82,7 @@ export default function ImagePreview() {
             </Button>
             {cropEnabled && (
               <Button onClick={cropImage} size="sm">
-                Crop and Upload
+                Save
               </Button>
             )}
           </div>
