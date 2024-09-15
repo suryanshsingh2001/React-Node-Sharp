@@ -113,6 +113,8 @@ Build a full-stack image processing web application that accepts image uploads, 
 - **React** - Frontend library for building user interfaces
 - **Context API** - State management across components
 - **TypeScript** - Type safety for better code structure and error handling
+- **Tailwind CSS** - Utility-first CSS framework for styling
+- **ShadcnUI** - React component library for UI elements
 
 ---
 
