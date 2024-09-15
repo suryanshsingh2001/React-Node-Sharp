@@ -1,6 +1,9 @@
-import React, { useState, useCallback } from 'react';
-import Cropper, { Area } from 'react-easy-crop';
-import { useImageContext } from '../context/ImageContext';
+import { useState, useCallback } from "react";
+import Cropper, { Area } from "react-easy-crop";
+import { useImageContext } from "../context/ImageContext";
+import { Button } from "../ui/button";
+import { Crop } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 
 export default function ImagePreview() {
   const { preview, setPreview } = useImageContext();
@@ -14,81 +17,110 @@ export default function ImagePreview() {
   const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
   const storageUrl = import.meta.env.VITE_STORAGE_URL;
 
-  const onCropComplete = useCallback((croppedArea: Area, croppedAreaPixels: Area) => {
-    setCroppedAreaPixels(croppedAreaPixels);
-  }, []);
+  const onCropComplete = useCallback(
+    (croppedArea: Area, croppedAreaPixels: Area) => {
+      setCroppedAreaPixels(croppedAreaPixels);
+    },
+    []
+  );
 
-  const onMediaLoaded = useCallback((mediaSize: { width: number; height: number; naturalWidth: number; naturalHeight: number }) => {
-    setNaturalWidth(mediaSize.naturalWidth);
-    setNaturalHeight(mediaSize.naturalHeight);
-  }, []);
+  const onMediaLoaded = useCallback(
+    (mediaSize: {
+      width: number;
+      height: number;
+      naturalWidth: number;
+      naturalHeight: number;
+    }) => {
+      setNaturalWidth(mediaSize.naturalWidth);
+      setNaturalHeight(mediaSize.naturalHeight);
+    },
+    []
+  );
 
   const cropImage = async () => {
-    if (!croppedAreaPixels || naturalWidth === null || naturalHeight === null) return;
+    if (!croppedAreaPixels || naturalWidth === null || naturalHeight === null)
+      return;
 
     try {
       const response = await fetch(`${apiBaseUrl}/crop`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           croppedAreaPixels,
           zoom,
           naturalWidth,
-          naturalHeight
+          naturalHeight,
         }),
       });
 
       const data = await response.json();
 
-      console.log('Cropped image:', data.previewUrl);
+      console.log("Cropped image:", data.previewUrl);
       setPreview(`${storageUrl}/${data.previewUrl}`);
-      
+
       setCropEnabled(false);
     } catch (error) {
-      console.error('Error cropping image', error);
+      console.error("Error cropping image", error);
     }
   };
 
   return (
-    <div className="border rounded-lg overflow-hidden">
-      {preview ? (
-        <div>
-          {!cropEnabled ? (
-            <img src={preview} alt="Preview" className="w-full h-auto" />
+    <Card className="h-full">
+      <CardHeader className="flex flex-row items-center justify-between">
+        <CardTitle>Preview</CardTitle>
+        {preview && (
+          <div className="flex flex-row gap-2">
+            <Button
+              variant={cropEnabled ? "secondary" : "default"}
+              onClick={() => setCropEnabled(!cropEnabled)}
+              size="sm"
+            >
+              <Crop className="mr-2 h-4 w-4" />
+              {cropEnabled ? "Exit Crop" : "Crop Image"}
+            </Button>
+            {cropEnabled && (
+              <Button onClick={cropImage} size="sm">
+                Crop and Upload
+              </Button>
+            )}
+          </div>
+        )}
+      </CardHeader>
+      <CardContent className="h-[calc(100%-4rem)]">
+        <div className="border rounded-lg overflow-hidden relative">
+          {preview ? (
+            <>
+              {!cropEnabled ? (
+                <img
+                  src={preview}
+                  alt="Preview"
+                  className="w-full h-full"
+                />
+              ) : (
+                <div className="relative w-full h-[calc(100vh-200px)]">
+                  <Cropper
+                    image={preview}
+                    crop={crop}
+                    zoom={zoom}
+                    aspect={4 / 3}
+                    onCropChange={setCrop}
+                    onCropComplete={onCropComplete}
+                    onMediaLoaded={onMediaLoaded}
+                  />
+                </div>
+              )}
+            </>
           ) : (
-            <div className="relative w-full h-[calc(100vh-200px)]">
-              <Cropper
-                image={preview}
-                crop={crop}
-             
-                aspect={4 / 3}
-                onCropChange={setCrop}
-                onCropComplete={onCropComplete}
-                onMediaLoaded={onMediaLoaded}
+            <div className="flex h-full w-full">
+              <img src="https://placehold.co/600x400?text=Your+Image+Comes+Here&font=Raleway" alt="No data" 
+                className="h-full w-full object-cover"
               />
             </div>
           )}
-          <div className="mt-2 space-y-2">
-            <button
-              className="btn-primary w-full"
-              onClick={() => setCropEnabled(!cropEnabled)}
-            >
-              {cropEnabled ? 'Disable Crop' : 'Enable Crop'}
-            </button>
-            {cropEnabled && (
-              <button className="btn-primary w-full" onClick={cropImage}>
-                Crop and Upload
-              </button>
-            )}
-          </div>
         </div>
-      ) : (
-        <div className="flex items-center justify-center bg-gray-100 text-gray-400 h-80">
-          No image uploaded
-        </div>
-      )}
-    </div>
+      </CardContent>
+    </Card>
   );
 }
