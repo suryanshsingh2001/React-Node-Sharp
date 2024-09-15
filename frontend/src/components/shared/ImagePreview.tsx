@@ -1,47 +1,53 @@
-import  { useState, useCallback } from 'react';
-import Cropper, {Area} from 'react-easy-crop';
+import React, { useState, useCallback } from 'react';
+import Cropper, { Area } from 'react-easy-crop';
 import { useImageContext } from '../context/ImageContext';
 
 export default function ImagePreview() {
   const { preview, setPreview } = useImageContext();
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
-  const [croppedArea, setCroppedArea] = useState<Area | null>(null);
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
   const [cropEnabled, setCropEnabled] = useState(false);
-
+  const [naturalWidth, setNaturalWidth] = useState<number | null>(null);
+  const [naturalHeight, setNaturalHeight] = useState<number | null>(null);
 
   const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
   const storageUrl = import.meta.env.VITE_STORAGE_URL;
 
-  const onCropComplete = useCallback((croppedArea : Area, croppedAreaPixels : any) => {
-    setCroppedArea(croppedArea);
+  const onCropComplete = useCallback((croppedArea: Area, croppedAreaPixels: Area) => {
+    setCroppedAreaPixels(croppedAreaPixels);
+  }, []);
+
+  const onMediaLoaded = useCallback((mediaSize: { width: number; height: number; naturalWidth: number; naturalHeight: number }) => {
+    setNaturalWidth(mediaSize.naturalWidth);
+    setNaturalHeight(mediaSize.naturalHeight);
   }, []);
 
   const cropImage = async () => {
-    if (!croppedArea) return;
+    if (!croppedAreaPixels || naturalWidth === null || naturalHeight === null) return;
 
-    // Send cropped data to backend
     try {
       const response = await fetch(`${apiBaseUrl}/crop`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ croppedArea }),
+        body: JSON.stringify({
+          croppedAreaPixels,
+          zoom,
+          naturalWidth,
+          naturalHeight
+        }),
       });
-
 
       const data = await response.json();
 
       console.log('Cropped image:', data.previewUrl);
-      setPreview(`${storageUrl}/${data.previewUrl}`); 
-
-
+      setPreview(`${storageUrl}/${data.previewUrl}`);
+      
       setCropEnabled(false);
     } catch (error) {
       console.error('Error cropping image', error);
-    } finally {
-      setCroppedArea(null);
     }
   };
 
@@ -52,29 +58,27 @@ export default function ImagePreview() {
           {!cropEnabled ? (
             <img src={preview} alt="Preview" className="w-full h-auto" />
           ) : (
-            <div className="relative w-full h-80 bg-gray-100">
-              {/* This container needs explicit height and relative positioning */}
+            <div className="relative w-full h-[calc(100vh-200px)]">
               <Cropper
                 image={preview}
                 crop={crop}
-                zoom={zoom}
-                aspect={4 / 3} // You can adjust this aspect ratio
+             
+                aspect={4 / 3}
                 onCropChange={setCrop}
                 onCropComplete={onCropComplete}
-                onZoomChange={setZoom}
-                style={{ containerStyle: { height: '100%' } }} // Ensure container height fills
+                onMediaLoaded={onMediaLoaded}
               />
             </div>
           )}
-          <div className="mt-2">
+          <div className="mt-2 space-y-2">
             <button
-              className="btn-primary"
+              className="btn-primary w-full"
               onClick={() => setCropEnabled(!cropEnabled)}
             >
               {cropEnabled ? 'Disable Crop' : 'Enable Crop'}
             </button>
             {cropEnabled && (
-              <button className="btn-primary ml-2" onClick={cropImage}>
+              <button className="btn-primary w-full" onClick={cropImage}>
                 Crop and Upload
               </button>
             )}
