@@ -1,12 +1,10 @@
-# FilterPixel Hiring Challenge
+# FilterPixel Hiring Challenge 🖼️✨
 
+![Project Screenshot](https://github.com/user-attachments/assets/87c1ca58-4f6a-4da3-ad68-c4c555fca37b)
 
-https://github.com/user-attachments/assets/87c1ca58-4f6a-4da3-ad68-c4c555fca37b
+---
 
-
-
-
-## Table of Contents
+## Table of Contents 📑
 1. [Objective](#objective)
 2. [Demo](#demo)
 3. [Local Setup Instructions](#local-setup-instructions)
@@ -34,10 +32,12 @@ https://github.com/user-attachments/assets/87c1ca58-4f6a-4da3-ad68-c4c555fca37b
 
 ---
 
-## Objective
+## Objective 🎯
 Build a full-stack image processing web application that accepts image uploads, processes them on the backend, and provides real-time previews of the manipulated image. Users can download the final processed image in their desired format (PNG or JPEG).
 
-## Local Setup Instructions
+---
+
+## Local Setup Instructions 🛠️
 
 ### Frontend Setup:
 1. Navigate to the `frontend` directory.
@@ -64,43 +64,45 @@ Build a full-stack image processing web application that accepts image uploads, 
     npm start
     ```
 
-## Features Checklist
+---
 
-- [x] **Image Upload**
+## Features Checklist ✅
+
+- [x] **Image Upload** 📤
   - Users can upload images in PNG or JPEG format.
   - Backend validates the file type and stores it temporarily in the `uploads` folder.
   
-- [x] **Real-Time Image Processing**
+- [x] **Real-Time Image Processing** ⚡
   - Low-quality previews are generated for fast real-time feedback.
   
-- [x] **Image Conversion**
+- [x] **Image Conversion** 🔄
   - Convert images between PNG and JPEG.
   
-- [x] **Brightness Adjustment**
+- [x] **Brightness Adjustment** ☀️
   - Slider for adjusting image brightness in real-time.
   
-- [x] **Contrast Adjustment**
+- [x] **Contrast Adjustment** 🎚️
   - Slider for adjusting image contrast in real-time.
   
-- [x] **Saturation Adjustment**
+- [x] **Saturation Adjustment** 🌈
   - Slider for adjusting image saturation in real-time.
   
-- [x] **Image Rotation**
+- [x] **Image Rotation** 🔄
   - Rotate images from 0-360 degrees with real-time preview.
   
-- [x] **Image Cropping**
+- [x] **Image Cropping** ✂️
   - Select a specific part of the image and crop it.
   
-- [x] **Final Image Download**
+- [x] **Final Image Download** 💾
   - Download the fully processed image in PNG or JPEG format.
   - Final image download is in high quality and saved in the `exports` folder.
   
-- [x] **Reset**
+- [x] **Reset** 🔄
   - Reset all image manipulations and return to the original state.
 
 ---
 
-## Tech Stack
+## Tech Stack 💻
 
 ### Backend:
 - **Node.js** - Server-side JavaScript runtime
@@ -118,7 +120,7 @@ Build a full-stack image processing web application that accepts image uploads, 
 
 ---
 
-## Image Storage
+## Image Storage 🗂️
 
 - **Uploads Folder**: 
   - `uploads/original`: Contains the original image uploaded by the user.
@@ -131,7 +133,7 @@ Build a full-stack image processing web application that accepts image uploads, 
 
 ---
 
-## Main Components
+## Main Components 🧩
 
 ### 1. **ImageControls**
 - Handles the various image manipulations (brightness, contrast, saturation, rotation, cropping).
@@ -155,46 +157,59 @@ Build a full-stack image processing web application that accepts image uploads, 
 
 ---
 
-## API Endpoints
+## API Endpoints 🔌
 
-### 1. Image Upload
+### 1. Image Upload 📤
 - **Endpoint**: `/api/upload`
 - **Method**: `POST`
 - **Description**: Uploads an image (PNG or JPEG) and stores it temporarily on the server in the `uploads/original` folder.
 
-### 2. Image Download
+### 2. Image Download 📥
 - **Endpoint**: `/api/download`
 - **Method**: `GET`
 - **Description**: Downloads the processed image in high-quality from the `exports` folder based on the user’s selected format (PNG or JPEG).
 
-### 3. Brightness Adjustment
+### 3. Brightness Adjustment ☀️
 - **Endpoint**: `/api/brightness`
 - **Method**: `POST`
 - **Description**: Adjusts the brightness of the image in real-time based on the slider input.
 
-### 4. Saturation Adjustment
+### 4. Saturation Adjustment 🌈
 - **Endpoint**: `/api/saturation`
 - **Method**: `POST`
 - **Description**: Adjusts the saturation of the image in real-time based on the slider input.
 
-### 5. Contrast Adjustment
+### 5. Contrast Adjustment 🎚️
 - **Endpoint**: `/api/contrast`
 - **Method**: `POST`
 - **Description**: Adjusts the contrast of the image in real-time based on the slider input.
 
-### 6. Image Rotation
+### 6. Image Rotation 🔄
 - **Endpoint**: `/api/rotate`
 - **Method**: `POST`
 - **Description**: Rotates the image by a specific degree (0-360) and provides a real-time preview.
 
-### 7. Image Cropping
+### 7. Image Cropping ✂️
 - **Endpoint**: `/api/crop`
 - **Method**: `POST`
 - **Description**: Crops the image based on the selected area and provides a real-time cropped preview.
 
-### 8. Reset Image
+### 8. Reset Image 🔄
 - **Endpoint**: `/api/reset`
 - **Method**: `POST`
 - **Description**: Resets all the image manipulations and reverts back to the original state of the image.
 
 ---
+
+## Contact 📞
+
+If you'd like to get in touch or check out my other projects, feel free to reach out:
+
+- **GitHub**: [Suryansh Singh](https://github.com/suryanshsingh2001)
+- **LinkedIn**: [Suryansh Singh](https://www.linkedin.com/in/suryansh-singh-473187235/)
+- **Twitter**: [@suryanshsingh_](https://x.com/SuryanshSi2001)
+- **Portfolio**: [Suryansh Singh](https://suryansh-folio.vercel.app/)
+
+--- 
+
+Hope you find this project interesting! 🚀
