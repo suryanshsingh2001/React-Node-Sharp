@@ -1,4 +1,4 @@
-# FilterPixel Hiring Challenge 🖼️✨
+# React Node Sharp 🖼️✨
 
 https://github.com/user-attachments/assets/87c1ca58-4f6a-4da3-ad68-c4c555fca37b
 
